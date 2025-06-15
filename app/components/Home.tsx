@@ -13,11 +13,24 @@ const items = [
   },
   {
     key: '2',
-    label: <Link to="" >Packages</Link>,
+    label: <Link to="" >Tours</Link>,
   },
   {
     key: '3',
-    label: <Link to="/" >About</Link>,
+    label: <Link to="/" >Products</Link>,
+  },
+  {
+    key: '4',
+    label: <Link to="/" >Zanzibar</Link>,
+  }
+  ,
+  {
+    key: '5',
+    label: <Link to="/" >Kilimanjaro</Link>,
+  },
+  {
+    key: '6',
+    label: <Link to="/" >Serengeti</Link>,
   }
 
 ];
