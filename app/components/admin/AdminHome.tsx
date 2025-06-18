@@ -1,0 +1,120 @@
+import { Button, Col, Flex, Progress, Row,Image, Layout, Menu, Drawer, Typography } from 'antd';
+import { Content, Footer, Header } from 'antd/es/layout/layout';
+import { isMobile, isTablet, isBrowser } from 'react-device-detect';
+import { Link, Outlet } from 'react-router-dom';
+import { LikeOutlined, MenuOutlined, MessageOutlined, ShoppingCartOutlined, StarOutlined, MailOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+
+
+const items = [
+  {
+    key: '1',
+    label: <Link to="/admin" >Home</Link>,
+  },
+  {
+    key: '2',
+    label: <Link to="tours" >Tours</Link>,
+  }
+
+];
+
+export default function Home() {
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <Layout >
+      {
+        isMobile ? 
+        (
+          <Header
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 1,
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor:'white'
+            
+            }}
+          >
+            
+            <div>
+                <MenuOutlined  onClick={() => setShowMenu(true)} style={{ fontSize:'25px'}}/>
+                <Drawer
+                    title="Menu"
+                    placement="left"
+                    onClose={() => setShowMenu(false)}
+                    open={showMenu}
+                    size='large'
+                    >
+
+                    <Menu
+                      theme="light"
+                      mode="vertical"
+                      defaultSelectedKeys={['1']}
+                      items={items}
+                      style={{ flex: 1, minWidth: 0 }}
+                      onClick={() => setShowMenu(false)}
+                    />
+                </Drawer>
+            </div>
+
+            {/* <div className="demo-logo" > */}
+            <div style={{  width:'100%', alignContent:'center', color:'black', textAlign:'center', fontSize:'50'}}>
+              {/* <Image preview={false}  src="logo-white-black.png" width='60%'/> */}
+              <h2>LetsExploreTanzania</h2>
+            </div>
+            
+          
+          </Header>
+        )
+        :
+        ( 
+            <Header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 1,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor:'white'
+              }}
+            >
+              <div className="demo-logo" style={{fontSize:'20px'}}>
+                {/* <Image preview={false}  src="mini.png"/> */}
+                <b>Admin Page</b>
+              </div>
+              <Menu
+                theme='light'
+                mode="horizontal"
+                defaultSelectedKeys={['1']}
+                items={items}
+                style={{ flex: 1, minWidth: 0 }}
+              />
+
+              
+            
+            </Header>
+        )
+      }
+        
+      <Content 
+        style={{
+          backgroundColor:"#F5F6F7",
+          padding:"10px"
+        }}
+      >
+      
+        <Outlet />
+        
+      </Content>
+      <Footer style={{textAlign:'center'}}>
+
+        ©{new Date().getFullYear()} Created by <a href='https://www.tante.tz' target="_blank">tante.tz</a>
+            
+      </Footer>
+    </Layout>
+      );
+}
