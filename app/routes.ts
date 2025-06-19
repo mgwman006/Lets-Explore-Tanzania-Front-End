@@ -25,7 +25,7 @@ const routes = [
     ]
   },
   {
-    path: "admin",
+    path: "/admin",
     Component: AdminHome,
     children: [
       {

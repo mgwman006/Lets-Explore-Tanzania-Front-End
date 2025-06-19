@@ -9,11 +9,11 @@ import { useState } from 'react';
 const items = [
   {
     key: '1',
-    label: <Link to="/admin" >Home</Link>,
+    label: <Link to="/admin" ><b>Home</b></Link>,
   },
   {
     key: '2',
-    label: <Link to="tours" >Tours</Link>,
+    label: <Link to="tours" ><b>Tours</b></Link>,
   }
 
 ];
@@ -34,7 +34,7 @@ export default function Home() {
               width: '100%',
               display: 'flex',
               alignItems: 'center',
-              backgroundColor:'white'
+              backgroundColor:'#1EB53A'
             
             }}
           >
@@ -54,14 +54,14 @@ export default function Home() {
                       mode="vertical"
                       defaultSelectedKeys={['1']}
                       items={items}
-                      style={{ flex: 1, minWidth: 0 }}
+                      style={{ flex: 1, minWidth: 0, backgroundColor:"#1EB53A" }}
                       onClick={() => setShowMenu(false)}
                     />
                 </Drawer>
             </div>
 
             {/* <div className="demo-logo" > */}
-            <div style={{  width:'100%', alignContent:'center', color:'black', textAlign:'center', fontSize:'50'}}>
+            <div style={{  width:'100%', alignContent:'center', color:'#FCD116', textAlign:'center', fontSize:'50'}}>
               {/* <Image preview={false}  src="logo-white-black.png" width='60%'/> */}
               <h2>LetsExploreTanzania</h2>
             </div>
@@ -79,19 +79,19 @@ export default function Home() {
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                backgroundColor:'white'
+                backgroundColor:'#1EB53A'
               }}
             >
-              <div className="demo-logo" style={{fontSize:'20px'}}>
+              <div className="demo-logo" style={{fontSize:'20px', color:'#FCD116'}}>
                 {/* <Image preview={false}  src="mini.png"/> */}
-                <b>Admin Page</b>
+                <h2>LetsExploreTanzania</h2>
               </div>
               <Menu
                 theme='light'
                 mode="horizontal"
                 defaultSelectedKeys={['1']}
                 items={items}
-                style={{ flex: 1, minWidth: 0 }}
+                style={{ flex: 1, minWidth: 0 , backgroundColor:"#1EB53A"}}
               />
 
               
@@ -100,12 +100,7 @@ export default function Home() {
         )
       }
         
-      <Content 
-        style={{
-          backgroundColor:"#F5F6F7",
-          padding:"10px"
-        }}
-      >
+      <Content >
       
         <Outlet />
         

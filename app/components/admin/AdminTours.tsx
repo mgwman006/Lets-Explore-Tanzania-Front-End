@@ -1,8 +1,8 @@
-import { List, Avatar, Image, Card, Row, Col, Button, Popconfirm, PopconfirmProps, notification, Modal } from "antd";
+import { List, Avatar, Image, Card, Row, Col, Button, Popconfirm, PopconfirmProps, notification, Modal, Breadcrumb } from "antd";
 import { useEffect, useState } from "react";
 import { StarOutlined, LikeOutlined, MessageOutlined, SettingOutlined, EditOutlined, EllipsisOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import Meta from "antd/es/card/Meta";
-import { getTours, deteleTour } from "../../services/admin/tourServices";
+import { getTours, deteleTour, getTourDetails } from "../../services/admin/tourServices";
 import { useNavigate } from "react-router-dom";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
@@ -79,12 +79,55 @@ export default function AdminTours()
    
 
    
+    const handleMoreTourDetails = (tourId: number) => {
+        
+        getTourDetails(tourId).then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    const tourData : TourDetailsDto = apiResponse.data;
+                    navigate(
+                        {
+                            pathname: "/admin/tours/tourdetails",
+                        },
+                        {
+                            state: { tourDetails: tourData },
+                        }
+                    );
+                }
+                else
+                {
+                    openNotificationWithIcon("error",apiResponse.message);
+                }
+            }
+        );
+    }
+
     return(
         <div>
             {notificationContextHolder}
-                        
-            <List
-                header={<Button onClick={() => navigate("addtour")} variant="outlined" color="green">Add New Tour <PlusOutlined /></Button>}
+              <Breadcrumb
+                
+                    items={[
+                    {
+                        title: <a href="/admin" >Admin Home</a>,
+                    },
+                    {
+                        title: 'Tours',
+                    },
+                    ]}
+                />
+
+            <div>
+                 <List
+                header={
+                    <Button 
+                        onClick={() => navigate("addtour")} 
+                        variant="solid" 
+                        color="blue">Add New Tour <PlusOutlined />
+                    </Button>
+                }
                 grid={{
                 gutter: 5,
                 xs: 1,
@@ -95,7 +138,7 @@ export default function AdminTours()
                 xxl: 4,
                 }}
                 style={{
-                    backgroundColor:"darkgray",
+                    backgroundColor:"",
                     padding:"10px"
                 }}
                 dataSource={tours}
@@ -108,9 +151,15 @@ export default function AdminTours()
                         <Card
                             cover={
                                 <Image
+                                    preview={false}
                                     alt="example"
-                                    src={item.getBannerImageUrl}
+                                    src={item.bannerImageUrl}
                                     fallback="../listfallbackimage.png"
+                                    height="200px"
+                                    width="100%"
+                                    style={{
+                                        objectFit: "cover",
+                                    }}
                                 />
                             }
                             actions={[
@@ -125,7 +174,7 @@ export default function AdminTours()
                                     <DeleteOutlined key="setting" />
                                 </Popconfirm>,
                                 <EditOutlined key="edit" />,
-                                <EllipsisOutlined key="ellipsis" />,
+                                <EllipsisOutlined key="ellipsis" onClick={() => handleMoreTourDetails(item.id)}/>,
                             ]}
                         >
                             <Meta
@@ -136,6 +185,8 @@ export default function AdminTours()
                     
                 )}
             />
+            </div>      
+           
         </div>
     );
 }

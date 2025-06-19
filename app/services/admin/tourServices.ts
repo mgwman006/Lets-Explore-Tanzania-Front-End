@@ -29,7 +29,7 @@ export const getTours = async () => {
         const response = await api.get<ApiResponse<TourListItemDto[]>>('/tour');
         return response.data;
     } catch (error) {
-        const data : ApiResponse<TourDetailsDto[]> = {
+        const data : ApiResponse<TourListItemDto[]> = {
         success: false,
         message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
         data: [],
@@ -43,7 +43,7 @@ export const getTours = async () => {
 export const createTour = async (userData: AddTourDto) => {
   try {
 
-    const response = await api.post<ApiResponse<CreatedTourDto>>('/tour', userData);
+    const response = await api.post<ApiResponse<TourDetailsDto>>('/tour', userData);
     return response.data;
 
     
@@ -90,12 +90,12 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
             title:"",
             description:"",
             pricePerPerson: 0,
-            duration:0,
-            isAvailableAllTheTime:true,
+            durationDays:0,
+            bannerImageUrl:"",
             destination:"",
-            getBannerImageUrl:"",
             photos:[],
-            AvailableDates:[]
+            hasSpecificDates:false,
+            tourDates: { startDate:"",endDate:""}
         },
         statusCode: 0
       }
@@ -104,25 +104,31 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
     }
 };
 
+export const getTourDetails = async (tourId: number) => {
+  
+    try {
+        const response = await api.get<ApiResponse<TourDetailsDto>>(`/tour/${tourId}`);
+        return response.data;
+      
+    } catch (error) {
+      const data : ApiResponse<TourDetailsDto> = {
+        success: false,
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: {
+            id:0,
+            title:"",
+            description:"",
+            pricePerPerson: 0,
+            durationDays:0,
+            bannerImageUrl:"",
+            destination:"",
+            photos:[],
+            hasSpecificDates:false,
+            tourDates:{ startDate:"",endDate:""}
+        },
+        statusCode: 0
+      }
+      return data;
 
-
-
-
-
-
-
-export const logInUser = (logInDetails: any) => {
-  return api.post('/users/logIn', logInDetails);
-};
-
-export const registerLandLord = (landLordData: any) => {
-  return api.post('/landlords', landLordData);
-};
-
-export const registerTenant = (landLordId:number,tenantData: any) => {
-  return api.post(`/landlords/${landLordId}/tenant`, tenantData);
-};
-
-export const getTenants = (landLordId:number) => {
-  return api.get(`/landlords/${landLordId}/tenant`);
+    }
 };

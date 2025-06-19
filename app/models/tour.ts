@@ -5,10 +5,11 @@ interface TourListItemDto
     title:string,
     description:string,
     pricePerPerson: number,
-    duration:number,
-    isAvailableAllTheTime:boolean,
+    durationDays:number,
+    bannerImageUrl:string,
     destination:string,
-    getBannerImageUrl:string
+    hasSpecificDates:boolean,
+    tourDates:TourDate
 }
 
 interface AddTourDto
@@ -16,9 +17,10 @@ interface AddTourDto
     title:string,
     description:string,
     pricePerPerson: number,
-    duration:number,
-    isAvailableAllTheTime:boolean,
+    durationDays:number,
     destination:string,
+    hasSpecificDates:boolean,
+    tourDates?:TourDate
 }
 
 interface CreatedTourDto
@@ -38,12 +40,12 @@ interface TourDetailsDto
     title:string,
     description:string,
     pricePerPerson: number,
-    duration:number,
-    isAvailableAllTheTime:boolean,
+    durationDays:number,
+    bannerImageUrl:string,
     destination:string,
-    getBannerImageUrl:string,
     photos:String[],
-    AvailableDates: TourDate[]
+    hasSpecificDates: boolean,
+    tourDates: TourDate
 }
 
 interface TourDate{

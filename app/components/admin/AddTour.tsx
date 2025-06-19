@@ -1,12 +1,10 @@
-import { Alert, Button, Col, DatePicker, Flex, Form, GetProp, Input, InputNumber, message, notification, Result, Row, Select, Space, Steps, Upload, UploadFile, UploadProps } from "antd";
+import { Alert, Breadcrumb, Button, Col, DatePicker, Flex, Form, GetProp, Input, InputNumber, message, notification, Result, Row, Select, Space, Steps, Upload, UploadFile, UploadProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useState } from "react";
 import ImgCrop from 'antd-img-crop';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { addBannerImage, addPhotos, createTour } from "../../services/admin/tourServices";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
-import { time } from "node:console";
-import { title } from "node:process";
 
 const { RangePicker } = DatePicker;
 
@@ -20,11 +18,12 @@ export default function AddTour()
     const [current, setCurrent] = useState(0);
     const [form] = Form.useForm();
     const [hideRangePicker,setHideRangePicker] = useState(true);
-    const [createdTour,setCreatedTour] = useState<CreatedTourDto>();
+    const [createdTour,setCreatedTour] = useState<TourDetailsDto>();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [fileListMultiplePhotos, setFileListMultiplePhotos] = useState<UploadFile[]>([]);
     const [tourDetails, setTourDetails] = useState<TourDetailsDto>();
+    const [rangePickerValue, setRangePickerValue] = useState<string[]>([]);
 
 
 
@@ -44,6 +43,8 @@ export default function AddTour()
 
     const onSubmitForm = (values: AddTourDto) =>
     {
+        values.tourDates = { startDate:rangePickerValue[0], endDate:rangePickerValue[1]};
+
         setLoading(true);
         setTimeout(() => {
             createTour(values).then(
@@ -51,6 +52,7 @@ export default function AddTour()
             {
                 if(apiResponse?.success)
                 {
+                    
                     setCreatedTour(apiResponse.data);
                     setCurrent(current+1);
                     openNotificationWithIcon('success',`${apiResponse.data.title} tour has created successfully`);
@@ -255,7 +257,7 @@ export default function AddTour()
 
                     <Form.Item
                         label="Duration (Days)"
-                        name="duration"
+                        name="durationDays"
                         rules={[{ required: true, message: 'Please enter duration' }]}
                     >
                         <InputNumber min={1}  style={{ width: '100%' }} />
@@ -263,7 +265,7 @@ export default function AddTour()
 
                     <Form.Item
                         label="Do you have specific dates?"
-                        name="isAvailableAllTheTime"
+                        name="hasSpecificDates"
                         initialValue={true}
                         rules={[{ required: true, message: 'Please enter isAvailableAllTheTime' }]}
                     >
@@ -273,23 +275,22 @@ export default function AddTour()
                             // defaultValue={true}
                             onChange={(e) => handleChange(e)}
                             options={[
-                            { value: false, label: 'yes' },
-                            { value: true, label: 'no' },
+                            { value: true, label: 'yes' },
+                            { value: false, label: 'no' },
                         
                             ]}
                         />
                     </Form.Item>
                     <Form.Item
-                        hidden={hideRangePicker}
+                        hidden={!hideRangePicker}
                     >
         
                         <RangePicker
-                        showTime={{ format: 'HH:mm' }}
-                        format="YYYY-MM-DD HH:mm"
-                        onChange={(value, dateString) => {
-                            console.log('Selected Time: ', value);
-                            console.log('Formatted Selected Time: ', dateString);
-                        }}
+                            showTime={{ format: 'HH:mm' }}
+                            format="YYYY-MM-DDTHH:mm"
+                            onChange={(value, dateString) => {
+                                setRangePickerValue(dateString);
+                            }}
                         //   onOk={onOk}
                         />
                     </Form.Item>
@@ -299,7 +300,16 @@ export default function AddTour()
                         name="destination"
                         rules={[{ required: true, message: 'Please enter destination' }]}
                     >
-                        <Input />
+                        <Select
+                            
+                            style={{ width: '100%' }}
+                            options={[
+                            { value: "Zanzibar", label: 'Zanzibar' },
+                            { value: "Kilimanjaro", label: 'Kilimanjaro' },
+                            { value: "Serengeti", label: 'Serengeti' },
+                        
+                            ]}
+                        />
                     </Form.Item>
 
                     <Form.Item label={null}>
@@ -380,7 +390,6 @@ export default function AddTour()
                     <Result
                         status="success"
                         title="Successfully Created a Tour!"
-                        subTitle="Order number: 2017182818828182881 Cloud server configuration takes 1-5 minutes, please wait."
                         extra={[
                         <Button type="primary" onClick={() => navigate("/admin/tours")}>
                             Go to list
@@ -412,25 +421,37 @@ export default function AddTour()
         <div
             style={
                 {
-                    backgroundColor:"darkgray",
                     padding:"10px"
                 }
             }
         >
                 {contextHolder}
-    
-                <Row justify={"center"}>
-                    <Col 
-                        span={24} 
-                        style={
-                            {
-                                backgroundColor:"white",
-                                padding:"10px"
-                            }
-                    }>
-                        <Steps current={current} items={steps} />
-                    </Col>
-                </Row>
+                  <Breadcrumb
+                    items={[
+                    {
+                        title: <a href="/admin">Admin Home</a>,
+                    },
+                    {
+                        title: <a href="/admin/tours">Tours</a>,
+                    },
+                    {
+                        title: 'Add Tour',
+                    },
+                    ]}
+                />
+                <div>
+                    <Row justify={"center"}>
+                        <Col 
+                            xs={24} sm={12} lg={12} xl={12} xxl={12} 
+                            style={
+                                {
+                                    backgroundColor:"white",
+                                    padding:"10px"
+                                }
+                        }>
+                            <Steps current={current} items={steps} />
+                        </Col>
+                    </Row>
                 
                 <Row 
                     justify={"center"}
@@ -443,7 +464,7 @@ export default function AddTour()
                                 justifyContent:"center", 
                                 alignContent:"center", 
                                 alignItems:"center",
-                                backgroundColor:"#faf8f2",
+                                backgroundColor:"lightyellow",
                                 padding:"20px",
                                 margin:"20px"
                             }
@@ -453,6 +474,9 @@ export default function AddTour()
 
                     </Col>
                 </Row>
+
+                </div>
+                
 
             
         </div>
