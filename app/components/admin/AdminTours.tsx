@@ -107,7 +107,7 @@ export default function AdminTours()
     return(
         <div>
             {notificationContextHolder}
-              <Breadcrumb
+                <Breadcrumb
                 
                     items={[
                     {
@@ -121,69 +121,70 @@ export default function AdminTours()
 
             <div>
                  <List
-                header={
-                    <Button 
-                        onClick={() => navigate("addtour")} 
-                        variant="solid" 
-                        color="blue">Add New Tour <PlusOutlined />
-                    </Button>
-                }
-                grid={{
-                gutter: 5,
-                xs: 1,
-                sm: 4,
-                md: 4,
-                lg: 4,
-                xl: 4,
-                xxl: 4,
-                }}
-                style={{
-                    backgroundColor:"",
-                    padding:"10px"
-                }}
-                dataSource={tours}
+                    header={
+                        <Button 
+                            onClick={() => navigate("addtour")} 
+                            variant="solid" 
+                            color="blue">Add New Tour <PlusOutlined />
+                        </Button>
+                    }
+                    grid={{
+                    gutter: 5,
+                    xs: 1,
+                    sm: 4,
+                    md: 4,
+                    lg: 4,
+                    xl: 4,
+                    xxl: 4,
+                    }}
+                    style={{
+                        backgroundColor:"",
+                        padding:"10px"
+                    }}
+                    dataSource={tours}
         
-                renderItem={(item) => (
+                    renderItem={(item) => (
 
-                    <List.Item
-                        key={item.title}
-                    >
-                        <Card
-                            cover={
-                                <Image
-                                    preview={false}
-                                    alt="example"
-                                    src={item.bannerImageUrl}
-                                    fallback="../listfallbackimage.png"
-                                    height="200px"
-                                    width="100%"
-                                    style={{
-                                        objectFit: "cover",
-                                    }}
-                                />
-                            }
-                            actions={[
-                                <Popconfirm
-                                    key={item.id}
-                                    onConfirm={() => handleDeleteTour(item.id)}
-                                    title={item.title}
-                                    description="Are you sure to delete this Tour?"
-                                    okText="Yes"
-                                    cancelText="No"
-                                >
-                                    <DeleteOutlined key="setting" />
-                                </Popconfirm>,
-                                <EditOutlined key="edit" />,
-                                <EllipsisOutlined key="ellipsis" onClick={() => handleMoreTourDetails(item.id)}/>,
-                            ]}
+                        <List.Item
+                            key={item.title}
+                            
                         >
-                            <Meta
-                                title={item.title}
-                            />
-                        </Card>
-                    </List.Item>
+                            <Card
+                                cover={
+                                    <Image
+                                        preview={false}
+                                        alt="example"
+                                        src={item.bannerImageUrl}
+                                        fallback="../listfallbackimage.png"
+                                        height="200px"
+                                        width="100%"
+                                        style={{
+                                            objectFit: "cover",
+                                        }}
+                                    />
+                                }
+                                actions={[
+                                    <Popconfirm
+                                        key={item.id}
+                                        onConfirm={() => handleDeleteTour(item.id)}
+                                        title={item.title}
+                                        description="Are you sure to delete this Tour?"
+                                        okText="Yes"
+                                        cancelText="No"
+                                    >
+                                        <DeleteOutlined key="setting" />
+                                    </Popconfirm>,
+                                    <EditOutlined key="edit" />,
+                                    <EllipsisOutlined key="ellipsis" onClick={() => handleMoreTourDetails(item.id)}/>,
+                                ]}
+                            >
+                                <Meta
+                                    title={item.title}
+                                />
+                            </Card>
+                        </List.Item>
                     
-                )}
+                    )}
             />
             </div>      
            
