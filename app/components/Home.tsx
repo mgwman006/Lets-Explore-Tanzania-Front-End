@@ -49,39 +49,43 @@ export default function Home() {
               top: 0,
               zIndex: 1,
               width: '100%',
-              display: 'flex',
-              alignItems: 'center',
+              
               backgroundColor:'white'
             
             }}
           >
+            <Flex vertical={false} gap={"large"} >
+                <div>
+                    <MenuOutlined  onClick={() => setShowMenu(true)} style={{ fontSize:'25px'}}/>
+                    <Drawer
+                        title="Menu"
+                        placement="left"
+                        onClose={() => setShowMenu(false)}
+                        open={showMenu}
+                        size='large'
+                        >
+
+                        <Menu
+                          theme="light"
+                          mode="vertical"
+                          defaultSelectedKeys={['1']}
+                          items={items}
+                          style={{ flex: 1, minWidth: 0 }}
+                          onClick={() => setShowMenu(false)}
+                        />
+                    </Drawer>
+                </div>
+                <div style={{  alignContent:'center'}}>
+                  <Image preview={false}  src="logo2.jpeg" width='100%'/> 
+                </div>
+                <div>
+                  <Button type='primary' size='large'>Book A Trip</Button>
+                </div>
+                
             
-            <div>
-                <MenuOutlined  onClick={() => setShowMenu(true)} style={{ fontSize:'25px'}}/>
-                <Drawer
-                    title="Menu"
-                    placement="left"
-                    onClose={() => setShowMenu(false)}
-                    open={showMenu}
-                    size='large'
-                    >
-
-                    <Menu
-                      theme="light"
-                      mode="vertical"
-                      defaultSelectedKeys={['1']}
-                      items={items}
-                      style={{ flex: 1, minWidth: 0 }}
-                      onClick={() => setShowMenu(false)}
-                    />
-                </Drawer>
-            </div>
-
-            {/* <div className="demo-logo" > */}
-            <div style={{  width:'100%', alignContent:'center', color:'black', textAlign:'center', fontSize:'50'}}>
-              {/* <Image preview={false}  src="logo-white-black.png" width='60%'/> */}
-              <h2>LetsExploreTanzania</h2>
-            </div>
+              </Flex>            
+            
+            
             
           
           </Header>
@@ -99,9 +103,8 @@ export default function Home() {
                 backgroundColor:'white'
               }}
             >
-              <div className="demo-logo" style={{fontSize:'20px'}}>
-                {/* <Image preview={false}  src="mini.png"/> */}
-                <b>LetsExploreTanzania</b>
+              <div className="demo-logo">
+                <Image preview={false}  src="logo1.jpg"/>
               </div>
               <Menu
                 theme='light'
