@@ -1,4 +1,10 @@
-# Welcome to React Router!
+# Welcome to LetsExplore Tanzania!
+
+Color Codes
+ --> Green (#1EB53A)
+ --> Blue (#00A3DD)
+ --> Yellow (#FCD116)
+ --> Black (#000000)
 
 A modern, production-ready template for building full-stack React applications using React Router.
 

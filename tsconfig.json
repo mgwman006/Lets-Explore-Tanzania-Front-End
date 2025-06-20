@@ -1,6 +1,6 @@
 {
   
-  "include": ["app"],
+  "include": ["app","vite-env.d.ts"],
 
   "compilerOptions": {
     
@@ -12,5 +12,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "types": ["vite/client"]
+
   }
 }
