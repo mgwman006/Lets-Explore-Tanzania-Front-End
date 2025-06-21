@@ -1,15 +1,30 @@
-import { Alert, Breadcrumb, Button, Col, DatePicker, Flex, Form, GetProp, Input, InputNumber, message, notification, Result, Row, Select, Space, Steps, Upload, UploadFile, UploadProps } from "antd";
+import { Alert, Breadcrumb, Button, Col, DatePicker, Flex, Form, GetProp, Input, InputNumber, message, notification, Result, Row, Select, Space, Steps, Table, TableProps, Upload, UploadFile, UploadProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImgCrop from 'antd-img-crop';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { addBannerImage, addPhotos, createTour } from "../../services/admin/tourServices";
+import { addBannerImage, addPhotos, addTourPrices, createTour, getCurrencies, getDestinations } from "../../services/admin/tourServices";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
+const columns: TableProps<TourPriceDTO>['columns'] = [
+  {
+    title: 'Quantity',
+    dataIndex: 'quantity',
+  },
+  {
+    title: 'Price Per Person',
+    dataIndex: 'pricePerPerson',
+  },
+  {
+    title: 'Currency',
+    dataIndex: 'currency',
+    render: (currency: any) => `${currency.symbol} (${currency.code || currency.name})`
+  },
+];
 
 export default function AddTour()
 {
@@ -24,10 +39,43 @@ export default function AddTour()
     const [fileListMultiplePhotos, setFileListMultiplePhotos] = useState<UploadFile[]>([]);
     const [tourDetails, setTourDetails] = useState<TourDetailsDto>();
     const [rangePickerValue, setRangePickerValue] = useState<string[]>([]);
+    const [selectedDestinations, setSelectedDestinations] = useState<string[]>([]);
+    const [destinationsOptions, setDestinationsOptions] = useState<string[]>([]);
+    const [currencies, setCurrencies] = useState<CurrencyDTO[]>([]);
+    const [tourPrices, setTourPrices] = useState<TourPriceDTO[]>([]);
+    const [tourPriceForm] = Form.useForm<AddTourPriceDTO>();
 
 
+    const filteredOptions = destinationsOptions.filter((o) => !selectedDestinations.includes(o));
 
-
+    useEffect(() => {
+        // Fetch destinations from the server or any other source 
+        getDestinations().then(
+            (apiResponse) => {
+                if(apiResponse.success)
+                {
+                    setDestinationsOptions(apiResponse.data);
+                }
+                else
+                {
+                    openNotificationWithIcon('error',`${apiResponse.message}`);
+                }
+            }
+        );  
+        
+        getCurrencies().then(
+            (apiResponse) => {
+                if(apiResponse.success)
+                {
+                    setCurrencies(apiResponse.data);
+                }
+                else
+                {
+                    openNotificationWithIcon('error',`${apiResponse.message}`);
+                }
+            }
+        );
+    }, []);
 
    
  
@@ -38,12 +86,13 @@ export default function AddTour()
     };
 
     function handleChange(value: boolean): void {
-       setHideRangePicker(value);
+       setHideRangePicker(!value);
     }
 
     const onSubmitForm = (values: AddTourDto) =>
     {
         values.tourDates = { startDate:rangePickerValue[0], endDate:rangePickerValue[1]};
+        values.destinations = selectedDestinations;
 
         setLoading(true);
         setTimeout(() => {
@@ -102,6 +151,32 @@ export default function AddTour()
          }
     }
     
+    function onSubmitTourPrice(values: AddTourPriceDTO): void {
+
+        setLoading(true);
+        const pricesToadd: AddTourPriceDTO[] = [];
+        pricesToadd.push(values);
+
+        if (createdTour?.id !== undefined) {
+            addTourPrices(createdTour.id, pricesToadd).then(
+                (apiResponse) => {
+                    if(apiResponse.success)
+                    {
+                        setTourPrices(apiResponse.data);
+                        tourPriceForm.resetFields(); // Reset the form after submission
+                        openNotificationWithIcon('success', 'Tour prices added successfully.');
+                    } else {
+                        openNotificationWithIcon('error', apiResponse.message);
+                    }
+                }
+            );
+        } else {
+            openNotificationWithIcon('error', 'Tour ID is undefined.');
+        }
+            
+        setLoading(false);
+          
+    }
 
     const propsUploadBannerImage: UploadProps = {
         fileList:fileList,
@@ -240,19 +315,11 @@ export default function AddTour()
                     </Form.Item>
 
                     <Form.Item
-                        label="Description"
-                        name="description"
-                        rules={[{ required: true, message: 'Please enter description' }]}
+                        label="Over View For Tour (Short Description)"
+                        name="overView"
+                        rules={[{ required: true, message: 'Please enter over view' }]}
                     >
-                        <TextArea rows={4}  maxLength={2000} showCount/>
-                    </Form.Item>
-
-                    <Form.Item
-                        label="PricePerPerson"
-                        name="pricePerPerson"
-                        rules={[{ required: true, message: 'Please enter pricePerPerson' }]}
-                    >
-                        <InputNumber min={1}  style={{ width: '100%' }}/>
+                        <TextArea rows={4}  maxLength={500} showCount/>
                     </Form.Item>
 
                     <Form.Item
@@ -264,15 +331,14 @@ export default function AddTour()
                     </Form.Item>
 
                     <Form.Item
+                        name ="hasSpecificDates"
                         label="Do you have specific dates?"
-                        name="hasSpecificDates"
-                        initialValue={true}
+                        initialValue={false}
                         rules={[{ required: true, message: 'Please enter isAvailableAllTheTime' }]}
                     >
                         <Select
                             
                             style={{ width: '100%' }}
-                            // defaultValue={true}
                             onChange={(e) => handleChange(e)}
                             options={[
                             { value: true, label: 'yes' },
@@ -282,7 +348,9 @@ export default function AddTour()
                         />
                     </Form.Item>
                     <Form.Item
-                        hidden={!hideRangePicker}
+                        name={'tourDates'}
+                        hidden={hideRangePicker}
+                        rules={[{ required: !hideRangePicker, message: 'Please select tour dates' }]}
                     >
         
                         <RangePicker
@@ -291,24 +359,25 @@ export default function AddTour()
                             onChange={(value, dateString) => {
                                 setRangePickerValue(dateString);
                             }}
-                        //   onOk={onOk}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="Destination"
-                        name="destination"
+                        label="Destinations"
                         rules={[{ required: true, message: 'Please enter destination' }]}
                     >
                         <Select
-                            
+                            mode="multiple"
+                            value={selectedDestinations}
+                            onChange={setSelectedDestinations}
+
                             style={{ width: '100%' }}
-                            options={[
-                            { value: "Zanzibar", label: 'Zanzibar' },
-                            { value: "Kilimanjaro", label: 'Kilimanjaro' },
-                            { value: "Serengeti", label: 'Serengeti' },
-                        
-                            ]}
+                                  options={filteredOptions.map((item) => ({
+                                    value: item,
+                                    label: item,
+                                }))}
+                            placeholder="Select destinations"
+                            allowClear
                         />
                     </Form.Item>
 
@@ -321,7 +390,7 @@ export default function AddTour()
             ),
         },
         {
-            title: 'Add Banner Image',
+            title: 'Banner Image',
             content: (
 
                     <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
@@ -343,6 +412,82 @@ export default function AddTour()
                     </div>
                     
                 
+            ),
+        },
+        {
+            title: 'Tour Pricces',
+            content: (
+                <>
+                
+                <Form<AddTourPriceDTO>
+                    layout="vertical"
+                    name="basic"
+                    form={tourPriceForm}
+                    initialValues={{ remember: true }}
+                    onFinish={onSubmitTourPrice}
+                    autoComplete="on"
+                >
+                    <Form.Item
+                        label="Quantity"
+                        name="quantity"
+                        rules={[{ required: true, message: 'Please enter quantity!' }]}
+                    >
+                        <InputNumber min={1}  style={{ width: '100%' }} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Price Per Person"
+                        name="pricePerPerson"
+                        rules={[{ required: true, message: 'Please enter price per person' }]}
+                    >
+                        <InputNumber min={1}  style={{ width: '100%' }}  />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Currency"
+                        name="currency"
+                        rules={[{ required: true, message: 'Please select currency' }]}
+                    >
+                        <Select
+                            style={{ width: '100%' }}
+                            options={currencies.map((currency) => ({
+                                value: currency.code,
+                                label: `${currency.symbol} (${currency.code})`,
+                            }))}
+                            placeholder="Select Currency"
+                            allowClear
+                        />
+                    </Form.Item>
+
+
+                    
+                    <Form.Item>
+                        <Alert message="You can add multiple tour prices." type="info" showIcon />
+                    </Form.Item>
+                    
+                    <Flex justify="space-between" align="center" gap="10px">
+                        <Form.Item label={null}>
+                            <Button type="primary" htmlType="submit" loading={loading}> 
+                                Add Tour Price
+                            </Button>
+                        </Form.Item>
+                        <Form.Item>
+                            <Button color="green" variant="solid" onClick={() => setCurrent(current+1)}>
+                                Done
+                            </Button>
+                        </Form.Item>
+                    </Flex>
+                </Form>
+
+                <Table<TourPriceDTO>
+                    columns={columns}
+                    dataSource={tourPrices}
+                    bordered
+                    title={() => 'Added Tour Prices'}
+                    
+                />
+
+                </>
             ),
         },
         {
@@ -477,11 +622,12 @@ export default function AddTour()
 
                 </div>
                 
-
             
         </div>
     )
 }
+
+
 
 
 

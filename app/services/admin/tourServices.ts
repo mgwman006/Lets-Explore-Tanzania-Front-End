@@ -132,3 +132,57 @@ export const getTourDetails = async (tourId: number) => {
 
     }
 };
+
+export const getDestinations = async () => {
+
+    try {
+        const response = await api.get<ApiResponse<string[]>>('/destination');
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<string[]> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: [],
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};
+
+export const getCurrencies = async () => {
+
+    try {
+        const response = await api.get<ApiResponse<CurrencyDTO[]>>('/currency');
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<CurrencyDTO[]> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: [],
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};
+
+export const addTourPrices = async (tourId: number,tourPrices : AddTourPriceDTO[]) => {
+
+    try {
+        const response = await api.post<ApiResponse<TourPriceDTO[]>>(`tour/${tourId}/prices`, tourPrices);
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<TourPriceDTO[]> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: [],
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};

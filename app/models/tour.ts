@@ -15,10 +15,9 @@ interface TourListItemDto
 interface AddTourDto
 {
     title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
-    destination:string,
+    destinations:string[],
     hasSpecificDates:boolean,
     tourDates?:TourDate
 }
@@ -51,4 +50,23 @@ interface TourDetailsDto
 interface TourDate{
     startDate:String,
     endDate:String
+}
+
+interface CurrencyDTO
+{
+    code:string,
+    symbol:string
+}
+
+interface AddTourPriceDTO{
+    quantity: number,
+    pricePerPerson: number,
+    currency: string
+}
+
+interface TourPriceDTO{
+    id: number,
+    quantity: number,
+    pricePerPerson: number,
+    currency: CurrencyDTO
 }
