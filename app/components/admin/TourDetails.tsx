@@ -3,21 +3,21 @@ import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsP
 import Meta from "antd/es/card/Meta";
 import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, EnvironmentOutlined, EnvironmentTwoTone, FieldTimeOutlined, LikeOutlined, MoneyCollectTwoTone } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { getTourDetails } from "../../services/admin/privateTourService";
+import { getPrivateTourDetails } from "../../services/admin/privateTourService";
 
 
 export default function TourDetails()
 {
     const location = useLocation();
     const tourId= location.state.tourId;
-    const [tourDetails, setTourDetails] = useState<TourDetailsDto>();
+    const [tourDetails, setTourDetails] = useState<PrivateTourDetailsDto>();
     const [previewImage,setPreviewImage] = useState("");
 
     // Fetch tour details using the tourId from the location state
     // This is a placeholder, you should replace it with your actual data fetching logic
     // For example, you might use useEffect to fetch the data when the component mounts
     useEffect(() => {
-        getTourDetails(tourId)
+        getPrivateTourDetails(tourId)
             .then((data) => {
                 if (data.success) {
                     setTourDetails(data.data);
@@ -41,18 +41,7 @@ export default function TourDetails()
                         <>
                             {/* <p><MoneyCollectTwoTone /> <b>Price:</b> {tourDetails.pricePerPerson}      <ClockCircleTwoTone /> <b>Duration:</b> {tourDetails.durationDays}</p> */}
                             <p><EnvironmentTwoTone /> <b>Destination:</b> {tourDetails.destinations.length}</p>
-                            <p><CalendarTwoTone /> <b>Availabe Dates:</b>
-                                {
-                                    tourDetails.hasSpecificDates ? 
-                                    (
-                                        <div>
-                                            <p><CalendarOutlined /> {`${tourDetails.tourDates.startDate}`}</p>
-                                            <p><CalendarOutlined /> {`${tourDetails.tourDates.endDate}`}</p>
-                                        </div>
-                                    ):
-                                    "Available all the time"
-                                }
-                            </p>
+                          
                             <Meta
                                 title={<Typography.Title level={5}>Overview</Typography.Title>}
                                 description={tourDetails.overView}
@@ -123,46 +112,43 @@ export default function TourDetails()
     return(
         <div
         >
-             <Breadcrumb
+            
+            <Breadcrumb
                     items={[
                     {
-                        title: <Link to="/admin">Admin Home</Link>,
+                        title: <a href="/admin">Admin Home</a>,
                     },
                     {
-                        title: <Link to='/admin/tours'> Tours</Link>,
+                        title: <a href="/admin/tours" type="button">Tours</a>,
                     },
                     {
                         title: 'Tour Details',
                     },
                     ]}
-            />
-            <Row
-                style={{backgroundColor:""}}
-            >
-                <Col span={24}>
+                />
+
+                <br />
+                <div>
                     <Image 
                         width="100%" 
                         preview={false}
                         src={tourDetails?.bannerImageUrl}
                         style={{
-                            
-                            height:"300px",
-                            objectFit: 'cover',// Prevent distortion
+                            width:"100%",
+                            // height:"300px",
+                            objectFit: "cover",// Prevent distortion
 
 
                         }}
                     />
-                    {
-                        tourDetails && tourDetails.tourDates && (
-                            <div>
-                                <p><CalendarOutlined /> {`${tourDetails.tourDates.startDate}`}</p>
-                                <p><CalendarOutlined /> {`${tourDetails.tourDates.endDate}`}</p>
-                               
-                        
-                            </div>
-         
-                        )
-                    }
+                </div>
+            <Row
+                style={{backgroundColor:""}}
+            >
+                <Col span={24}>
+                    
+                    
+                   
                     
                     <Card
                         title={tourDetails?.title}

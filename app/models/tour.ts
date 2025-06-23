@@ -28,7 +28,7 @@ interface PrivateTourCreatedDto
     destinations:string[],
 }
 
-interface TourDetailsDto
+interface PrivateTourDetailsDto
 {
     id:number,
     title:string,
@@ -36,9 +36,8 @@ interface TourDetailsDto
     durationDays:number,
     bannerImageUrl:string,
     destinations:string[],
-    hasSpecificDates: boolean,
-    tourDates: TourDate,
     tourPrice: TourPriceDTO[],
+    photo:string[]
 }
 
 interface TourDate{

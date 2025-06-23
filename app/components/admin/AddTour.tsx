@@ -231,49 +231,15 @@ export default function AddTour()
         name: 'bannerImage',
         multiple: false,
         maxCount: 1,
-        fileList:bannerImageFileList,
-        listType: "picture",
-        accept: "image/*",
-        onRemove: (file) => {
-            setBannerImageFileList([]);
-            return true;
-        },
-        beforeUpload: (file) => {
-
-            if (!(file instanceof File)) {
-                openNotificationWithIcon("error","invalid file")
-                return false;
-            }
-
-            if (!file.type.startsWith('image/')) {
-                openNotificationWithIcon("error","only image allowed")
-
-                return false;
-            }
-            if (file.type.startsWith('image/svg+xml')) {
-                openNotificationWithIcon("error","SVG file not supported")
-                return false;
-             }
-            return true;
-        },
-        customRequest({ file, onSuccess }) {
-            setBannerImageFileList([
-                {
-                    ...(file as UploadFile),
-                    uid: (file as any).uid || Date.now().toString(),
-                    name: (file as File).name,
-                    status: 'done',
-                    url: (file as any).url,
-                    originFileObj: file as any, // keep as any to satisfy UploadFile type
-                }
-            ]);
-            
+        listType: 'picture',
+        accept: 'image/*',
+        fileList: bannerImageFileList,
+        customRequest: ({ file, onSuccess }) => {
             onSuccess?.('ok');
-
         },
-        onChange(info)
-        {
-            //Do nothing
+        onChange: ({ file, fileList }) => {
+            setBannerImageFileList(fileList);
+            
         }
     };
 
@@ -619,13 +585,19 @@ export default function AddTour()
         },
         {
             title: 'Complete',
-            icon: <SmileOutlined />,
+            icon: tourGuideCurrentStep==3 ?<SmileOutlined /> : "",
             description:(
-                <Result
+                <div
+                                        hidden = {tourGuideCurrentStep != 3}
+
+                >
+                    <Result
                     icon={<SmileOutlined />}
                     title="Great, we have done all the operations!"
                     extra={<Button type="primary" onClick={() => setCurrent(current+1)}>Next</Button>}
                 />
+                </div>
+                
             )
         }
     ];
@@ -692,8 +664,11 @@ export default function AddTour()
                         label="Banner Image (Required)"
                     >
                         <ImgCrop 
-                            aspect={4 / 3}
+                            
+                            aspect={3 / 1}
                             rotationSlider
+                            showGrid={true}
+                            modalTitle="Crop Banner Image"
                         >
                             <Upload
                                 {...propsUploadBannerImage}

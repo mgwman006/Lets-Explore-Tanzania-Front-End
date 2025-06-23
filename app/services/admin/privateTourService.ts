@@ -73,7 +73,7 @@ export const createPrivateTour = async (userData: FormData) => {
 export const deteleTour = async (tourId: number) => {
   
     try {
-        const response = await api.delete<ApiResponse<null>>(`/tour/${tourId}`);
+        const response = await api.delete<ApiResponse<null>>(`/tour/private/${tourId}`);
         return response.data;
       
     } catch (error) {
@@ -91,7 +91,7 @@ export const deteleTour = async (tourId: number) => {
 export const addPhotos = async (tourId: number,photos: FormData) => {
   
     try {
-        const response = await api.post<ApiResponse<TourDetailsDto>>(`/tour/${tourId}/photos`, photos, 
+        const response = await api.post<ApiResponse<PrivateTourDetailsDto>>(`/tour/${tourId}/photos`, photos, 
         {
             headers: {'Content-Type': 'multipart/form-data'},
         }
@@ -100,7 +100,7 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
         return response.data;
       
     } catch (error) {
-      const data : ApiResponse<TourDetailsDto> = {
+      const data : ApiResponse<PrivateTourDetailsDto> = {
         success: false,
         message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
         data: {
@@ -110,9 +110,8 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
             durationDays:0,
             bannerImageUrl:"",
             destinations:[],
-            hasSpecificDates:false,
-            tourDates: { startDate:"",endDate:""},
-            tourPrice:[]
+            tourPrice:[],
+            photo:[]
         },
         statusCode: 0
       }
@@ -121,14 +120,14 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
     }
 };
 
-export const getTourDetails = async (tourId: number) => {
+export const getPrivateTourDetails = async (tourId: number) => {
   
     try {
-        const response = await api.get<ApiResponse<TourDetailsDto>>(`/tour/${tourId}`);
+        const response = await api.get<ApiResponse<PrivateTourDetailsDto>>(`/tour/private/${tourId}`);
         return response.data;
       
     } catch (error) {
-      const data : ApiResponse<TourDetailsDto> = {
+      const data : ApiResponse<PrivateTourDetailsDto> = {
         success: false,
         message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
         data: {
@@ -138,9 +137,8 @@ export const getTourDetails = async (tourId: number) => {
             durationDays:0,
             bannerImageUrl:"",
             destinations:[],
-            hasSpecificDates:false,
-            tourDates: { startDate:"",endDate:""},
-            tourPrice:[]
+            tourPrice:[],
+            photo:[]
         },
         statusCode: 0
       }

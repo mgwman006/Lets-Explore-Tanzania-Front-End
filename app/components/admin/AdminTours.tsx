@@ -2,7 +2,7 @@ import { List, Avatar, Image, Card, Row, Col, Button, Popconfirm, PopconfirmProp
 import { useEffect, useState } from "react";
 import { StarOutlined, LikeOutlined, MessageOutlined, SettingOutlined, EditOutlined, EllipsisOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import Meta from "antd/es/card/Meta";
-import { getPrivateTours, deteleTour, getTourDetails } from "../../services/admin/privateTourService";
+import { getPrivateTours, deteleTour } from "../../services/admin/privateTourService";
 import { useNavigate } from "react-router-dom";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
