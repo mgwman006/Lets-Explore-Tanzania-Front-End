@@ -1,50 +1,44 @@
 
-interface TourListItemDto
+interface PrivateTourListItemDto
 {
     id:number,
     title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string,
-    hasSpecificDates:boolean,
-    tourDates:TourDate
+    destination:string[],
+    tourPrice: TourPriceDTO[],
 }
 
-interface AddTourDto
+interface PrivateTourAddDto
 {
     title:string,
     overView:string,
     durationDays:number,
     destinations:string[],
-    hasSpecificDates:boolean,
-    tourDates?:TourDate
 }
 
-interface CreatedTourDto
+interface PrivateTourCreatedDto
 {
     id:number,
     title:string,
-    description:string,
-    pricePerPerson: number,
-    duration:number,
-    isAvailableAllTheTime:boolean,
-    destination:string,
+    overView:string,
+    durationDays:number,
+    bannerImageUrl:string,
+    destinations:string[],
 }
 
 interface TourDetailsDto
 {
     id:number,
     title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string,
-    photos:String[],
+    destinations:string[],
     hasSpecificDates: boolean,
-    tourDates: TourDate
+    tourDates: TourDate,
+    tourPrice: TourPriceDTO[],
 }
 
 interface TourDate{
@@ -69,4 +63,42 @@ interface TourPriceDTO{
     quantity: number,
     pricePerPerson: number,
     currency: CurrencyDTO
+}
+
+interface AddTourActivityDTO
+{
+    dayNumber: number,
+    title: string,
+    description: string,
+    location: string,
+    startTime: string,
+    endTime: string,
+
+}
+
+interface TourActivityDTO
+{
+    id: number,
+    dayNumber: number,
+    title: string,
+    description: string,
+    location: string,
+    startTime: string,
+    endTime: string,
+    photos: string[]
+}
+
+interface MeetingPoint
+{
+    details: string,
+    location: string,
+    dateTime: string,
+}
+
+interface TourGuideDTO
+{
+    id: number,
+    pickUpInformation: MeetingPoint,
+    endOfTourInformation: MeetingPoint,
+    tourActivities: TourActivityDTO[]
 }

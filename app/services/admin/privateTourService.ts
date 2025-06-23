@@ -23,13 +23,13 @@ export const addBannerImage = async (tourId: number,image: FormData) => {
     }
 };
 
-export const getTours = async () => {
+export const getPrivateTours = async () => {
 
     try {
-        const response = await api.get<ApiResponse<TourListItemDto[]>>('/tour');
+        const response = await api.get<ApiResponse<PrivateTourListItemDto[]>>('/tour/private');
         return response.data;
     } catch (error) {
-        const data : ApiResponse<TourListItemDto[]> = {
+        const data : ApiResponse<PrivateTourListItemDto[]> = {
         success: false,
         message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
         data: [],
@@ -40,15 +40,33 @@ export const getTours = async () => {
   
 };
 
-export const createTour = async (userData: AddTourDto) => {
+export const createPrivateTour = async (userData: FormData) => {
   try {
 
-    const response = await api.post<ApiResponse<TourDetailsDto>>('/tour', userData);
+    const response = await api.post<ApiResponse<PrivateTourCreatedDto>>(
+        '/tour/private', userData,
+        {
+            headers: {'Content-Type': 'multipart/form-data'},
+        }
+    );
     return response.data;
 
     
   } catch (error) {
-    alert("unknow error "+error);
+    const data : ApiResponse<PrivateTourCreatedDto> = {
+      success: false,
+      message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+      data: {
+          id:0,
+          title:"",
+          overView:"",
+          durationDays:0,
+          bannerImageUrl:"",
+          destinations:[]
+      },
+      statusCode: 0
+    }
+    return data;
   }
 };
 
@@ -88,14 +106,13 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
         data: {
             id:0,
             title:"",
-            description:"",
-            pricePerPerson: 0,
+            overView:"",
             durationDays:0,
             bannerImageUrl:"",
-            destination:"",
-            photos:[],
+            destinations:[],
             hasSpecificDates:false,
-            tourDates: { startDate:"",endDate:""}
+            tourDates: { startDate:"",endDate:""},
+            tourPrice:[]
         },
         statusCode: 0
       }
@@ -117,14 +134,13 @@ export const getTourDetails = async (tourId: number) => {
         data: {
             id:0,
             title:"",
-            description:"",
-            pricePerPerson: 0,
+            overView:"",
             durationDays:0,
             bannerImageUrl:"",
-            destination:"",
-            photos:[],
+            destinations:[],
             hasSpecificDates:false,
-            tourDates:{ startDate:"",endDate:""}
+            tourDates: { startDate:"",endDate:""},
+            tourPrice:[]
         },
         statusCode: 0
       }
@@ -172,7 +188,7 @@ export const getCurrencies = async () => {
 export const addTourPrices = async (tourId: number,tourPrices : AddTourPriceDTO[]) => {
 
     try {
-        const response = await api.post<ApiResponse<TourPriceDTO[]>>(`tour/${tourId}/prices`, tourPrices);
+        const response = await api.post<ApiResponse<TourPriceDTO[]>>(`tour/private/${tourId}/prices`, tourPrices);
         return response.data;
     } catch (error) {
       const data : ApiResponse<TourPriceDTO[]> = {
@@ -186,3 +202,73 @@ export const addTourPrices = async (tourId: number,tourPrices : AddTourPriceDTO[
     }
   
 };
+
+export const addTourActivity = async (tourId: number,formData:FormData) => {
+  
+    
+      try {
+          
+          const photoResponse = await api.post<ApiResponse<TourActivityDTO[]>>(`/tour/private/${tourId}/activity`, formData, 
+          {
+              headers: {'Content-Type': 'multipart/form-data'},
+          }
+          
+          );
+          return photoResponse.data;
+        
+      } catch (error) {
+        const data : ApiResponse<TourActivityDTO[]> = {
+          success: false,
+          message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+          data: [],
+          statusCode: 0
+        }
+        return data;
+  
+      }
+};
+
+export const createTourGuide = async (tourId: number,pickUpInformation: MeetingPoint) => {
+  
+    try {
+        const response = await api.post<ApiResponse<TourGuideDTO>>(`/tour/private/${tourId}/guide`, pickUpInformation);
+        return response.data;
+      
+    } catch (error) {
+      const data : ApiResponse<TourGuideDTO> = {
+        success: false,
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: {
+            id:0,
+            pickUpInformation:{details:"",location:"",dateTime:""},
+            endOfTourInformation:{details:"",location:"",dateTime:""},
+            tourActivities:[]
+        },
+        statusCode: 0
+      }
+      return data;
+
+    }
+}
+
+export const addEndOfTourInformation = async (tourGuideId: number,endOfTourInformation: MeetingPoint) => {
+  
+    try {
+        const response = await api.post<ApiResponse<MeetingPoint>>(`/tour/private/guide/${tourGuideId}/point/end`, endOfTourInformation);
+        return response.data;
+      
+    } catch (error) {
+      const data : ApiResponse<MeetingPoint> = {
+        success: false,
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: {
+            details:"",
+            location:"",
+            dateTime: ""
+        },
+        statusCode: 0
+      }
+      return data;
+
+    }
+}

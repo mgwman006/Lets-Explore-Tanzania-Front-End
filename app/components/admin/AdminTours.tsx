@@ -2,7 +2,7 @@ import { List, Avatar, Image, Card, Row, Col, Button, Popconfirm, PopconfirmProp
 import { useEffect, useState } from "react";
 import { StarOutlined, LikeOutlined, MessageOutlined, SettingOutlined, EditOutlined, EllipsisOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import Meta from "antd/es/card/Meta";
-import { getTours, deteleTour, getTourDetails } from "../../services/admin/tourServices";
+import { getPrivateTours, deteleTour, getTourDetails } from "../../services/admin/privateTourService";
 import { useNavigate } from "react-router-dom";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
@@ -10,7 +10,7 @@ export default function AdminTours()
 {
 
     const navigate = useNavigate();
-    const [tours, setTours] = useState<TourListItemDto[]>([]);
+    const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
     const [notificationApi, notificationContextHolder] = notification.useNotification();
 
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
@@ -21,7 +21,7 @@ export default function AdminTours()
 
     const getLatestTourData = () =>
     {
-        getTours().then(
+        getPrivateTours().then(
             (apiResponse) =>
             {
                 if (apiResponse && apiResponse.message)
@@ -72,7 +72,7 @@ export default function AdminTours()
                     
                 }
                     , 
-                3000
+                1000
             );
         }
     ); 
@@ -81,27 +81,16 @@ export default function AdminTours()
    
     const handleMoreTourDetails = (tourId: number) => {
         
-        getTourDetails(tourId).then(
-            (apiResponse) =>
+        
+        navigate(
             {
-                if(apiResponse.success)
-                {
-                    const tourData : TourDetailsDto = apiResponse.data;
-                    navigate(
-                        {
-                            pathname: "/admin/tours/tourdetails",
-                        },
-                        {
-                            state: { tourDetails: tourData },
-                        }
-                    );
-                }
-                else
-                {
-                    openNotificationWithIcon("error",apiResponse.message);
-                }
+                pathname: "/admin/tours/tourdetails",
+            },
+            {
+                state: { tourId: tourId },
             }
         );
+                
     }
 
     return(

@@ -1,9 +1,9 @@
-import { Alert, Breadcrumb, Button, Col, DatePicker, Flex, Form, GetProp, Input, InputNumber, message, notification, Result, Row, Select, Space, Steps, Table, TableProps, Upload, UploadFile, UploadProps } from "antd";
+import { Alert, Breadcrumb, Button, Col, DatePicker, Drawer, Flex, Form, GetProp, Input, InputNumber, List, message, notification, Result, Row, Select, Space, Steps, Table, TableProps, Tag, Typography, Upload, UploadFile, UploadProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useEffect, useState } from "react";
 import ImgCrop from 'antd-img-crop';
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { addBannerImage, addPhotos, addTourPrices, createTour, getCurrencies, getDestinations } from "../../services/admin/tourServices";
+import { EnvironmentOutlined, LoadingOutlined, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { addBannerImage, addEndOfTourInformation, addPhotos, addTourActivity, addTourPrices, createPrivateTour, createTourGuide, getCurrencies, getDestinations } from "../../services/admin/privateTourService";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
@@ -32,18 +32,41 @@ export default function AddTour()
     const [api, contextHolder] = notification.useNotification();
     const [current, setCurrent] = useState(0);
     const [form] = Form.useForm();
-    const [hideRangePicker,setHideRangePicker] = useState(true);
-    const [createdTour,setCreatedTour] = useState<TourDetailsDto>();
-    const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [createdTour,setCreatedTour] = useState<PrivateTourCreatedDto>();
+    const [bannerImageFileList, setBannerImageFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [fileListMultiplePhotos, setFileListMultiplePhotos] = useState<UploadFile[]>([]);
-    const [tourDetails, setTourDetails] = useState<TourDetailsDto>();
-    const [rangePickerValue, setRangePickerValue] = useState<string[]>([]);
     const [selectedDestinations, setSelectedDestinations] = useState<string[]>([]);
     const [destinationsOptions, setDestinationsOptions] = useState<string[]>([]);
     const [currencies, setCurrencies] = useState<CurrencyDTO[]>([]);
     const [tourPrices, setTourPrices] = useState<TourPriceDTO[]>([]);
     const [tourPriceForm] = Form.useForm<AddTourPriceDTO>();
+    const [tourActivitisies, setTourActivities] = useState<TourActivityDTO[]>([]);
+    const [tourActivityForm] = Form.useForm<AddTourActivityDTO>();
+    const [tourGuideCurrentStep, setTourGuideCurrentStep] = useState<number>(0);
+    const [pickUpInformationForm] = Form.useForm<MeetingPoint>();
+    const [endOfTourInformationForm] = Form.useForm<MeetingPoint>();
+    const [tourGuide, setTourGuide] = useState<TourGuideDTO | null>(null);
+    const [open, setOpen] = useState(false);
+
+
+    const { Option } = Select;
+
+    const showDrawer = () => {
+        tourActivityForm.setFieldsValue({
+            dayNumber: tourActivitisies.length+1,
+            title: "",
+            description: "",
+            startTime: "",
+            endTime: "",
+            location: ""
+        });
+        setOpen(true);
+    };
+
+    const onClose = () => {
+        setOpen(false);
+    };
 
 
     const filteredOptions = destinationsOptions.filter((o) => !selectedDestinations.includes(o));
@@ -75,6 +98,8 @@ export default function AddTour()
                 }
             }
         );
+
+        tourActivityForm.setFieldsValue({dayNumber: 0}); // Initialize dayNumber to 1
     }, []);
 
    
@@ -85,18 +110,19 @@ export default function AddTour()
         });
     };
 
-    function handleChange(value: boolean): void {
-       setHideRangePicker(!value);
-    }
-
-    const onSubmitForm = (values: AddTourDto) =>
+    const onSubmitPrivateTourForm = (values: PrivateTourAddDto) =>
     {
-        values.tourDates = { startDate:rangePickerValue[0], endDate:rangePickerValue[1]};
-        values.destinations = selectedDestinations;
-
         setLoading(true);
+        values.destinations = selectedDestinations;
+        const formData = new FormData();
+        formData.append("metadata", new Blob([JSON.stringify(values)], { type: "application/json" }));
+        if (bannerImageFileList.length > 0 && bannerImageFileList[0].originFileObj) {
+            formData.append("bannerImage", bannerImageFileList[0].originFileObj as File);
+        }   
+
+
         setTimeout(() => {
-            createTour(values).then(
+            createPrivateTour(formData).then(
             (apiResponse) =>
             {
                 if(apiResponse?.success)
@@ -114,42 +140,11 @@ export default function AddTour()
             }
         );
        
-        }, 3000);
+        }, 1000);
 
         
     }
 
-
-    const handleSubmitMorePhotoes = () => {
-
-        setLoading(true);
-        const formData = new FormData();
-        fileListMultiplePhotos.forEach((file, idx) => {
-            if (file.originFileObj) {
-                formData.append("photos", file.originFileObj as File);
-            }
-        });
-
-         if (createdTour?.id !== undefined)
-         {
-            addPhotos(createdTour?.id,formData).then(
-            (apiResponse) => {
-                if(apiResponse.success)
-                {
-                    setTourDetails(apiResponse.data);
-                    openNotificationWithIcon("success","success");
-                    setCurrent(current+1);
-                }
-                else{
-                    openNotificationWithIcon("error", apiResponse.message);
-                }
-                setLoading(false);
-            })
-         }
-         else{
-            openNotificationWithIcon("error", "tour id is undefined")
-         }
-    }
     
     function onSubmitTourPrice(values: AddTourPriceDTO): void {
 
@@ -178,67 +173,110 @@ export default function AddTour()
           
     }
 
-    const propsUploadBannerImage: UploadProps = {
-        fileList:fileList,
-        maxCount: 1,
-        listType: 'picture',
-        customRequest({ file, onSuccess, onError }) {
+    function submitTourActivity(values: AddTourActivityDTO) {
+        setLoading(true);
+        const formData = new FormData();
+        fileListMultiplePhotos.forEach((file, idx) => {
+            if (file.originFileObj) {
+                formData.append("images", file.originFileObj as File);
+            }
+        });
+
+        const activityToAdd: AddTourActivityDTO = {
+                ...values,
+                startTime: values.startTime ? values.startTime : "00:00",
+                endTime: values.endTime ? values.endTime : "00:00"
+            };
+
+        
+        
+        formData.append("metadata", new Blob([JSON.stringify(activityToAdd)], { type: "application/json" }));
+     
+        if (tourGuide?.id !== undefined) {
             
+            addTourActivity(tourGuide.id, formData).then(
+                (apiResponse) => {
+                    if(apiResponse.success)
+                    {
+                        setTourActivities(apiResponse.data);
+                        tourActivityForm.resetFields(); // Reset the form after submission
+                        tourActivityForm.setFieldsValue({
+                            dayNumber: apiResponse.data.length+1,
+                            title: "",
+                            description: "",
+                            startTime: "",
+                            endTime: "",
+                            location: ""
+                        });
+                        if (createdTour?.durationDays !== undefined && apiResponse.data.length >= createdTour.durationDays) {
+                            setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
+                        }
+                        
+                        setFileListMultiplePhotos([]); // Clear the file list after submission
+                        openNotificationWithIcon('success', 'Tour activity added successfully.');
+                        
+                    } else {
+                        openNotificationWithIcon('error', apiResponse.message);
+                    }
+                }
+            );
+        } else {
+            openNotificationWithIcon('error', 'Tour ID or Tour Guide ID is undefined.');
+        }
+
+        setLoading(false);
+    }
+
+    const propsUploadBannerImage: UploadProps = {
+        name: 'bannerImage',
+        multiple: false,
+        maxCount: 1,
+        fileList:bannerImageFileList,
+        listType: "picture",
+        accept: "image/*",
+        onRemove: (file) => {
+            setBannerImageFileList([]);
+            return true;
+        },
+        beforeUpload: (file) => {
+
             if (!(file instanceof File)) {
-                onError?.(new Error('Invalid file type.'));
-                return;
+                openNotificationWithIcon("error","invalid file")
+                return false;
             }
 
             if (!file.type.startsWith('image/')) {
-                onError?.(new Error('Only image files are allowed.'));
-                return;
+                openNotificationWithIcon("error","only image allowed")
+
+                return false;
             }
             if (file.type.startsWith('image/svg+xml')) {
-                onError?.(new Error('SVG files are NOT allowed.'));
-                return;
-            }
+                openNotificationWithIcon("error","SVG file not supported")
+                return false;
+             }
+            return true;
+        },
+        customRequest({ file, onSuccess }) {
+            setBannerImageFileList([
+                {
+                    ...(file as UploadFile),
+                    uid: (file as any).uid || Date.now().toString(),
+                    name: (file as File).name,
+                    status: 'done',
+                    url: (file as any).url,
+                    originFileObj: file as any, // keep as any to satisfy UploadFile type
+                }
+            ]);
             
-            const formData = new FormData();
-            formData.append('image', file);
-
-            if (createdTour?.id !== undefined) {
-                addBannerImage(createdTour.id, formData).then(
-                    (apiResponse) => {
-                        if(apiResponse?.success)
-                        {
-                            onSuccess?.('ok');
-                        }
-                        else
-                        {
-                            onError?.(new Error(apiResponse?.message || 'Unknown error'));
-                        }
-                    }
-                );
-            } else {
-                onError?.(new Error('Tour ID is undefined.'));
-                return;
-            }
-
+            onSuccess?.('ok');
 
         },
         onChange(info)
         {
-            if (info.file.status === 'done') 
-            {
-                openNotificationWithIcon('success',"Barnner Successfully upload");
-                setCurrent(current+1);
-            } 
-            else if (info.file.status === 'error') 
-            {
-                // messageApi.error(`${info.file.error} upload failed.`);
-                openNotificationWithIcon('error',`${info.file.error} upload failed`)
-                setFileList([]); 
-            }
-            else{
-                setFileList(info.fileList);
-            }
+            //Do nothing
         }
     };
+
     const propsMoreImages: UploadProps = {
         fileList:fileListMultiplePhotos,
         maxCount: 10,
@@ -291,19 +329,320 @@ export default function AddTour()
         }
     };
 
+    function submitPickUpInformation(values: MeetingPoint) {
+        
+        setLoading(true);
+        setTimeout(() => {
+            if (createdTour?.id !== undefined) {
+                createTourGuide(createdTour.id, values).then(
+                    (apiResponse) => {
+                        if (apiResponse.success) {
+
+                            setTourGuide(apiResponse.data);
+                            pickUpInformationForm.resetFields(); // Reset the form after submission
+                            setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
+                            openNotificationWithIcon('success', 'Pick up information submitted successfully.');
+
+                        } else {
+                            openNotificationWithIcon('error', apiResponse.message);
+                        }
+                    }
+                );
+            } else {
+                openNotificationWithIcon('error', 'Tour ID is undefined.');
+            }
+            setLoading(false);
+        }, 1000);
+
+    }
+
+    function submitEndOfTourInformation(values: MeetingPoint) {
+        setLoading(true);
+        setTimeout(() => {
+            if (tourGuide?.id !== undefined) {
+                addEndOfTourInformation(tourGuide?.id, values).then(
+                    (apiResponse) => {
+                        if (apiResponse.success) {
+
+                            tourGuide.endOfTourInformation = apiResponse.data;
+                            setTourGuide(tourGuide);
+                            setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
+
+                            openNotificationWithIcon('success', 'Pick up information submitted successfully.');
+
+                        } else {
+                            openNotificationWithIcon('error', apiResponse.message);
+                        }
+                    }
+                );
+            } else {
+                openNotificationWithIcon('error', 'Tour ID is undefined.');
+            }
+            setLoading(false);
+        }, 1000);
+    }
+    const tourGuideSteps = [
+        {
+            title: 'Pick Up Information',
+            icon: tourGuideCurrentStep===0 ? <EnvironmentOutlined />:"",
+            description: (
+                <Form<MeetingPoint>
+                    hidden={tourGuideCurrentStep !== 0}
+                    title={"Pick Up Information"}
+                    layout="vertical"
+                    name="pickUpInfo"
+                    form={pickUpInformationForm}
+                    onFinish={(values) => {submitPickUpInformation(values)}}
+                >
+                    <Form.Item
+                        label="Pick Up Location (Ideal Location, may vary)"
+                        name="location"
+                        rules={[{ required: true, message: 'Please enter pick up location!' }]}
+                    >
+                        <Input maxLength={100} showCount />
+                    </Form.Item>
+
+                    <Form.Item
+                        hidden={true}
+                        label="Pick Up Date"
+                        name="date"
+                        rules={[{ required: false, message: 'Please select pick up date' }]}
+                    >
+                        <DatePicker style={{ width: '100%' }} />
+                    </Form.Item>
+
+
+                    <Form.Item
+                        label="More Information"
+                        name="details"
+                        rules={[{ required: true, message: 'Please enter more information' }]}>
+                        <TextArea rows={4} maxLength={500} showCount />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={loading}>
+                            Submit Pick Up Information
+                        </Button>
+                    </Form.Item>
+                </Form>
+            ),
+        },
+        {
+            title: 'Day To Day Tour Guide',
+            icon: tourGuideCurrentStep===1 ? <SolutionOutlined />:"",
+
+            description: (
+                <>
+                {tourGuideCurrentStep === 1 && (
+                    <>
+                        <Tag color="red">{`${tourActivitisies.length}/${createdTour?.durationDays} day(s) Added`}</Tag>
+                        <br />
+                        <List<TourActivityDTO>
+                            bordered
+                            size="small"
+                            header={<div>Tour Activities</div>}
+                            dataSource={tourActivitisies}
+                            renderItem={(item, index) => (
+                                <List.Item key={item.id}>
+                                    <Typography.Text strong>{`Day ${item.dayNumber}: ${item.title}`}</Typography.Text>
+                                    
+                                    
+                                </List.Item>
+                            )}
+                        />
+                        <Button 
+                            key="addActivity" 
+                            type="primary" 
+                            onClick={showDrawer}
+                            style={{ marginTop: 16 }}
+                        >
+                            Add Day {tourActivitisies.length+1} Activity <PlusOutlined />
+                        </Button>
+
+                        <Drawer
+                            title="Add Tour Activity"
+                            width={720}
+                            onClose={onClose}
+                            open={open}
+                            styles={{
+                            body: {
+                                paddingBottom: 80,
+                            },
+                            }}
+                            extra={
+                            <Space>
+                                <Button onClick={onClose}>Cancel</Button>
+                            </Space>
+                            }
+                        >
+                            <Form<AddTourActivityDTO>
+                                layout="vertical"
+                                name="basic"
+                                form={tourActivityForm}
+                                initialValues={tourActivityForm.getFieldsValue()}
+                                onFinish={(values) => {submitTourActivity(values)}}
+                            >
+                                <Form.Item 
+                                    label="Day Number"
+                                    name="dayNumber"
+                                    rules={[{ required: true, message: 'Please enter day number' }]}
+                                    >
+                                    <InputNumber 
+                                        min={0}  
+                                        style={{ width: '100%' }} 
+                                    
+                                    />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Activity Title"                            
+                                    name="title"
+                                    rules={[{ required: true, message: 'Please enter activity title!' }]}
+                                >
+                                    <Input 
+                                        maxLength={100} 
+                                        showCount
+                                    />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Description"
+                                    name="description"
+                                    rules={[{ required: true, message: 'Please enter activity description' }]}
+                                >
+                                    <TextArea rows={4}  maxLength={100} showCount/>
+                                </Form.Item>
+
+                                <Form.Item
+                                    label='location'
+                                    name="location"
+                                    rules={[{ required: true, message: 'Please enter activity location' }]}
+                                >
+                                    <Input maxLength={100} showCount />
+                                </Form.Item>
+
+                        
+
+                                <Form.Item
+                                    label="Start Time (Optional)"
+                                    name="startTime"
+                                    rules={[{ required: false, message: 'Please enter start time' }]}
+                                    >
+                                    <Input type="time" style={{ width: '100%' }} />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="End Time (Optional)"
+                                    name="endTime"
+                                    rules={[{ required: false, message: 'Please enter end time' }]}
+                                    >
+                                    <Input type="time" style={{ width: '100%' }} />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Add Photos (Required)"
+                                    name={"photos"}
+                                    rules={[{ required: true, message: 'Please upload at least one photo' }]}
+                                >
+                                    <Upload
+                                        {...propsMoreImages}
+                                    >
+                                        {fileListMultiplePhotos.length >= 8 ? null : 
+                                        (<div style={{backgroundColor:"white", width:"100%"}}>
+                                            <p>+</p>
+                                            <p>Upload</p>
+                                        </div>)}
+                                    </Upload>
+                                </Form.Item>
+
+                                <Form.Item>
+                                    <Flex justify="space-between" align="center" gap="10px">
+                                        <Button type="primary" htmlType="submit" loading={loading}>
+                                            Add Activity
+                                        </Button>
+                                    </Flex>
+
+                                </Form.Item>
+                            </Form>
+                        </Drawer>
+                    </>
+                )}
+                
+                
+                </>
+            ),
+        },
+        {
+            title: 'End of Tour / Departure',
+            icon: tourGuideCurrentStep===2 ? <EnvironmentOutlined />:"",
+            description: (
+                <Form<MeetingPoint>
+                    hidden={tourGuideCurrentStep !== 2}
+                    title={"End of Tour Information"}
+                    layout="vertical"
+                    name="endOfTourInfo"
+                    form={endOfTourInformationForm}
+                    onFinish={(values) => {submitEndOfTourInformation(values)}}
+                >
+                    <Form.Item
+                        label="Dearture point (Ideal Location, may vary)"
+                        name="location"
+                        rules={[{ required: true, message: 'Please enter location!' }]}
+                    >
+                        <Input maxLength={100} showCount />
+                    </Form.Item>
+
+                    <Form.Item
+                        hidden={true}
+                        label="Pick Up Date"
+                        name="dateTime"
+                        rules={[{ required: false, message: 'Please select  date' }]}
+                    >
+                        <DatePicker style={{ width: '100%' }} />
+                    </Form.Item>
+
+
+                    <Form.Item
+                        label="More Information"
+                        name="details"
+                        rules={[{ required: true, message: 'Please enter more information' }]}>
+                        <TextArea rows={4} maxLength={500} showCount />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={loading}>
+                            Submit Information
+                        </Button>
+                    </Form.Item>
+                </Form>
+            ),
+        },
+        {
+            title: 'Complete',
+            icon: <SmileOutlined />,
+            description:(
+                <Result
+                    icon={<SmileOutlined />}
+                    title="Great, we have done all the operations!"
+                    extra={<Button type="primary" onClick={() => setCurrent(current+1)}>Next</Button>}
+                />
+            )
+        }
+    ];
+
 
     const steps = [
         {
             title: 'Add new Tour',
             content: (
-                <Form<AddTourDto>
+                <Form<PrivateTourAddDto>
                     title={"New Tour"}
                     size={"large"}
                     layout="vertical"
                     name="basic"
                     form={form}
                     initialValues={{ remember: true }}
-                    onFinish={onSubmitForm}
+                    onFinish={onSubmitPrivateTourForm}
                     autoComplete="on"
                 >
                     <Form.Item
@@ -329,39 +668,7 @@ export default function AddTour()
                     >
                         <InputNumber min={1}  style={{ width: '100%' }} />
                     </Form.Item>
-
-                    <Form.Item
-                        name ="hasSpecificDates"
-                        label="Do you have specific dates?"
-                        initialValue={false}
-                        rules={[{ required: true, message: 'Please enter isAvailableAllTheTime' }]}
-                    >
-                        <Select
-                            
-                            style={{ width: '100%' }}
-                            onChange={(e) => handleChange(e)}
-                            options={[
-                            { value: true, label: 'yes' },
-                            { value: false, label: 'no' },
-                        
-                            ]}
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        name={'tourDates'}
-                        hidden={hideRangePicker}
-                        rules={[{ required: !hideRangePicker, message: 'Please select tour dates' }]}
-                    >
-        
-                        <RangePicker
-                            showTime={{ format: 'HH:mm' }}
-                            format="YYYY-MM-DDTHH:mm"
-                            onChange={(value, dateString) => {
-                                setRangePickerValue(dateString);
-                            }}
-                        />
-                    </Form.Item>
-
+                    
                     <Form.Item
                         label="Destinations"
                         rules={[{ required: true, message: 'Please enter destination' }]}
@@ -381,6 +688,21 @@ export default function AddTour()
                         />
                     </Form.Item>
 
+                    <Form.Item
+                        label="Banner Image (Required)"
+                    >
+                        <ImgCrop 
+                            aspect={4 / 3}
+                            rotationSlider
+                        >
+                            <Upload
+                                {...propsUploadBannerImage}
+                            >
+                                <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
+                            </Upload>
+                        </ImgCrop>
+                    </Form.Item>
+                    
                     <Form.Item label={null}>
                         <Button type="primary" htmlType="submit" loading={loading}>
                             Submit
@@ -390,34 +712,16 @@ export default function AddTour()
             ),
         },
         {
-            title: 'Banner Image',
-            content: (
-
-                    <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
-                
-                        <ImgCrop 
-                            aspect={4 / 3}
-                            rotationSlider
-                        >
-                            <Upload
-                                {...propsUploadBannerImage}
-                            >
-
-                                <Button icon={<UploadOutlined />}>Upload Banner Image</Button>
-                            </Upload>
-                        </ImgCrop>
-                        
-                        
-
-                    </div>
-                    
-                
-            ),
-        },
-        {
             title: 'Tour Pricces',
             content: (
                 <>
+                 <Table<TourPriceDTO>
+                    columns={columns}
+                    dataSource={tourPrices}
+                    bordered
+                    title={() => 'Added Tour Prices'}
+                    
+                />
                 
                 <Form<AddTourPriceDTO>
                     layout="vertical"
@@ -468,66 +772,121 @@ export default function AddTour()
                     <Flex justify="space-between" align="center" gap="10px">
                         <Form.Item label={null}>
                             <Button type="primary" htmlType="submit" loading={loading}> 
-                                Add Tour Price
+                                Add Tour Price <PlusOutlined />
                             </Button>
                         </Form.Item>
                         <Form.Item>
-                            <Button color="green" variant="solid" onClick={() => setCurrent(current+1)}>
-                                Done
+                            <Button 
+                                color="green" 
+                                variant="solid" 
+                                onClick={() => setCurrent(current+1)}
+                            >
+                                Next Step <RightOutlined />
                             </Button>
                         </Form.Item>
                     </Flex>
                 </Form>
 
-                <Table<TourPriceDTO>
-                    columns={columns}
-                    dataSource={tourPrices}
-                    bordered
-                    title={() => 'Added Tour Prices'}
-                    
-                />
+               
 
                 </>
             ),
         },
         {
-            title: 'Add Photos',
+            title: 'Tour Guide',
             content: (
+               
+                <Steps
+                    direction="vertical"
+                    size="small"
+                    current={tourGuideCurrentStep}
+                    items={tourGuideSteps}
+                />
+               
+                // <Flex vertical>
+                //     <Steps
+                //         // progressDot
+                //         direction="horizontal"
+                //         current={tourActivitisies.length}
+                //         items={
+                //             Array.from(
+                //                 { length: numberOfDays }, 
+                //                 (_, i) => ({
+                //                     title: i === 0 ? "On Arrival" : i === numberOfDays - 1 ? "End of Tour" : `Day ${i}`
+                //                 })
+                //             )
+                //         }
+                //         style={{ marginBottom: '20px' }}
+                //     />
 
+                //     <br />
+                
+                  
+                //     {!hideTourActivitiyForm && 
+                //         (
+                //             
+                //     {hideTourActivitiyForm &&
+                //         (
+                //             <>
+                //             <Alert message="You have added all activities for this tour. You can not add more activities." type="warning" showIcon />
+                //             <br />
+                //             <Button
+                //                 color="green"
+                //                 variant="solid"
+                //                 onClick={() => setCurrent(current+1)}
+                //                 >NEXT <RightOutlined /></Button>
+                //             </>
+                //         )
+                //     }
+                
 
-                <div style={
-                        {
-                            display:"flex", 
-                            flexDirection:"column", 
-                            alignItems:"center",
-                            gap:"20px"
-                        }
-                    }>
-                    
-                    <div>
-                        <Upload
-                        {...propsMoreImages}
-                        >
-
-                            {fileList.length >= 8 ? null : 
-                                (<div>
-                                    <p>+</p>
-                                    <p>Upload</p>
-                                </div>)}
-
-                        </Upload>
-                    </div>
-                    
-                    <div hidden={fileListMultiplePhotos.length==0}>
-                        <Button loading={loading} size="large" variant="solid" color="green" onClick={handleSubmitMorePhotoes}>Submit</Button>
-                    </div>
-                    
-
-                </div>
                     
                 
-            ),
-        },
+                
+                // </Flex>
+            )
+                
+        }
+        // ,
+        // {
+        //     title: 'Add Photos',
+        //     content: (
+
+
+        //         <div style={
+        //                 {
+        //                     display:"flex", 
+        //                     flexDirection:"column", 
+        //                     alignItems:"center",
+        //                     gap:"20px"
+        //                 }
+        //             }>
+                    
+        //             <div>
+        //                 <Upload
+        //                 {...propsMoreImages}
+        //                 >
+
+        //                     {fileList.length >= 8 ? null : 
+        //                         (<div>
+        //                             <p>+</p>
+        //                             <p>Upload</p>
+        //                         </div>)}
+
+        //                 </Upload>
+        //             </div>
+                    
+        //             <div hidden={fileListMultiplePhotos.length==0}>
+        //                 <Button loading={loading} size="large" variant="solid" color="green" onClick={handleSubmitMorePhotoes}>Submit</Button>
+        //             </div>
+                    
+
+        //         </div>
+                    
+                
+        //     ),
+        // }
+        ,
         {
             title:"Done",
             content: (
@@ -548,7 +907,7 @@ export default function AddTour()
                                             pathname: "/admin/tours/tourdetails",
                                         },
                                         {
-                                            state: { tourDetails: tourDetails },
+                                            state: { tourId: createdTour?.id},
                                         }
                                     );
 
@@ -594,10 +953,23 @@ export default function AddTour()
                                     padding:"10px"
                                 }
                         }>
-                            <Steps current={current} items={steps} />
+                            <Steps onChange={(value)=> setCurrent(value)} current={current} items={steps} />
                         </Col>
                     </Row>
                 
+                <Row
+                    justify={"center"}
+                >
+                    <Col 
+                        xs={24} sm={12} lg={12} xl={12} xxl={12} 
+                        style={
+                            {
+                                textAlign:"center",
+                            }
+                        }>
+                            <Typography.Title level={3}>{createdTour?.title}</Typography.Title>
+                        </Col>
+                </Row>
                 <Row 
                     justify={"center"}
                     style={{ }}
@@ -614,7 +986,6 @@ export default function AddTour()
                                 margin:"20px"
                             }
                         }>
-
                             {steps[current].content}
 
                     </Col>
@@ -626,6 +997,11 @@ export default function AddTour()
         </div>
     )
 }
+
+
+
+
+
 
 
 
