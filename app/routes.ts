@@ -1,4 +1,3 @@
-import path from "path";
 import Home from "./components/Home";
 import HomePage from "./components/HomePage";
 import Projects from "./components/Projects";
