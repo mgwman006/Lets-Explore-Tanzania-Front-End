@@ -6,7 +6,7 @@ interface PrivateTourListItemDto
     overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string[],
+    destinations:string[],
     tourPrice: TourPriceDTO[],
 }
 
