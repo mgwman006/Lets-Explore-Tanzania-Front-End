@@ -163,8 +163,7 @@ export default function AdminTours()
                                     >
                                         <DeleteOutlined key="setting" />
                                     </Popconfirm>,
-                                    <EditOutlined key="edit" />,
-                                    <EllipsisOutlined key="ellipsis" onClick={() => handleMoreTourDetails(item.id)}/>,
+                                    <EditOutlined key="edit" onClick={() => handleMoreTourDetails(item.id)}/>,
                                 ]}
                             >
                                 <Meta

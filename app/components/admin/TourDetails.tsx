@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex } from 'antd';
 import Meta from "antd/es/card/Meta";
 import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, EnvironmentOutlined, EnvironmentTwoTone, FieldTimeOutlined, LikeOutlined, MoneyCollectTwoTone } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { getPrivateTourDetails } from "../../services/admin/privateTourService";
+import { getPrivateTourDetails, getTourGuideDetails } from "../../services/admin/privateTourService";
 
 
 export default function TourDetails()
@@ -12,101 +12,175 @@ export default function TourDetails()
     const tourId= location.state.tourId;
     const [tourDetails, setTourDetails] = useState<PrivateTourDetailsDto>();
     const [previewImage,setPreviewImage] = useState("");
+    const [tourGuide, setTourGuide] = useState<TourGuideDTO>();
 
     // Fetch tour details using the tourId from the location state
     // This is a placeholder, you should replace it with your actual data fetching logic
     // For example, you might use useEffect to fetch the data when the component mounts
     useEffect(() => {
         getPrivateTourDetails(tourId)
-            .then((data) => {
-                if (data.success) {
-                    setTourDetails(data.data);
-                    setPreviewImage(data.data.bannerImageUrl || "");
+            .then((apiResponse) => {
+                if (apiResponse.success) {
+                    setTourDetails(apiResponse.data);
+                    setPreviewImage(apiResponse.data.bannerImageUrl || "");
                 } else {
-                    console.error("Failed to fetch tour details:", data.message);
+                    console.error("Failed to fetch tour details:", apiResponse.message);
                 }
             })
             .catch((error) => {
                 console.error("Error fetching tour details:", error);
             });
+
+        // Fetch tour guide details if needed
+        getTourGuideDetails(tourId)
+            .then((apiResponse) => {
+            if (apiResponse.success) {
+                setTourGuide(apiResponse.data);
+            } else {
+                console.error("Failed to fetch tour guide details:", apiResponse.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching tour guide details:", error);
+        });   
     }, [tourId]);
 
-    const tabItems: TabsProps['items'] = [
+    const activitiesTabItems: TabsProps['items'] = [
         {
             key: '1',
             label: 'Details',
             children: (
-                <>
-                    {tourDetails && (
-                        <>
-                            {/* <p><MoneyCollectTwoTone /> <b>Price:</b> {tourDetails.pricePerPerson}      <ClockCircleTwoTone /> <b>Duration:</b> {tourDetails.durationDays}</p> */}
-                            <p><EnvironmentTwoTone /> <b>Destination:</b> {tourDetails.destinations.length}</p>
-                          
-                            <Meta
-                                title={<Typography.Title level={5}>Overview</Typography.Title>}
-                                description={tourDetails.overView}
-                            />
-                        </>
-                    )}
-                </>
+            
+                <div>
+                    <Flex   gap={"small"} >
+                        <Button variant="outlined" color="green" size="small">Update Details</Button>
+                        <Button variant="outlined" color="green" size="small">Update Price list</Button>
+                    </Flex>
+                    <p><EnvironmentTwoTone /> {tourDetails?.destinations?.join(", ")} <br /><ClockCircleTwoTone /> {tourDetails?.durationDays} Days</p>
+                    <Meta
+                        title='Overview'
+                        description={tourDetails?.overView}
+                    />
+                    <Table
+                        title={() => <Typography.Title level={5}>Tour Price</Typography.Title>}
+                        style={{ marginTop: '20px' }}
+                        dataSource={tourDetails?.tourPrice}
+                        pagination={false}
+                        rowKey="id"
+                        columns={[
+                            {
+                                title: 'Quantity',
+                                dataIndex: 'quantity',
+                                key: 'quantity',
+                            },
+                            {
+                                title: 'Price Per Person',
+                                dataIndex: 'pricePerPerson',
+                                key: 'pricePerPerson',
+                            },
+                            {
+                                title: 'Currency',
+                                dataIndex: ['currency', 'code'],
+                                key: 'currencyCode',
+                            },
+                        ]}
+                    />
+                    
+                        
+                </div>
+                
             ),
         },
-        // {
-        //     key: '2',
-        //     label: 'Photos',
-        //     children: (
-        //         <div>
-        //             <div
-        //                 style={{
-        //                     display:"flex",
-        //                     justifyContent:"center",
-                                    
-        //                     }}
-        //                 >
-        //                         {
-        //                             tourDetails.photos.map(
-        //                                 (photoUrl,index) =>
-        //                                 (
-        //                                     <Image
-        //                                         key={index}
-        //                                         src={photoUrl.toString()}
-        //                                         width={50}
-        //                                         height={50}
-        //                                         style={{
-        //                                             margin:10,
-        //                                             cursor:"pointer",
-        //                                         }}
-        //                                         onClick={() => setPreviewImage(photoUrl.toString())}
-        //                                         preview={false}
-
-        //                                     />
-        //                                 )
-        //                             )
-        //                         }
-        //             </div>
-                            
-        //             <div>
-        //                 <Image 
-        //                     src={previewImage} 
-        //                     preview={false} 
-        //                     width="100%"
-        //                     height={400}
-        //                     style={{
-        //                         objectFit:"contain"
-        //                     }}
-        //                 />
-        //             </div>
-                            
-        //         </div>
-        //     ),
-        // },
+        {
+            key: '2',
+            label: 'Activities',
+            children: (
+                tourGuide && tourGuide.tourActivities?.length > 0 ? (
+                    <div
+                        style={{
+                            padding: '10px',
+                            borderRadius: '8px', // Rounded corners
+                        }}
+                    >
+                        <Button variant="outlined" size="small" color="green" onClick={() => alert("Add Activities")}>Update Activities</Button>
+                        <br />
+                        <Meta
+                            title={<p><EnvironmentOutlined /> Pick Up Information</p>} 
+                            description={tourGuide?.pickUpInformation?.details}
+                        />
+                        <List
+                            itemLayout="vertical"
+                            dataSource={tourGuide?.tourActivities}
+                            renderItem={(item) => (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        title={<Typography.Title level={5}>Day {item.dayNumber}: {item.title}</Typography.Title>}
+                                        description={
+                                            <div>
+                                                <p>{item.description}</p>
+                                                <p><EnvironmentOutlined /> {item.location}</p>
+                                                <p><ClockCircleFilled /> {item.startTime} - {item.endTime}</p>
+                                            </div>
+                                        }
+                                    />
+                                    <List
+                                        grid={{ gutter: 10, column: 10 }}
+                                        dataSource={item.photos}
+                                        renderItem={(photo) => (
+                                            <List.Item>
+                                                <Image
+                                                    width={100}
+                                                    height={100}
+                                                    src={photo}
+                                                    alt={photo}
+                                                    style={{ objectFit: 'cover' }}
+                                                    // onClick={() => setPreviewImage(photo)}
+                                                />
+                                            </List.Item>
+                                        )}
+                                    />
+                                </List.Item>
+                            )}
+                        />
+                        <Meta
+                            title={<p><EnvironmentOutlined /> End of Tour Information</p>}
+                            description={tourGuide?.endOfTourInformation?.details}
+                        />
+                    </div>
+                ) : (
+                    <div>
+                        <Meta
+                            title='No Activities Available'
+                            description='This tour currently has no activities scheduled.'
+                        />
+                        <br />
+                        <Button variant="outlined" size="small" color="green" onClick={() => alert("Add Activities")}>Add Activities</Button>
+                    </div>
+                )
+            ),
+        },
         {
             key: '3',
-            label: 'Activities',
-            children: 'No Activity Yet',
-            disabled: true,
-
-        },
+            label: 'Photos',
+            children: (
+                <List
+                    grid={{ gutter: 16, column: 3 }}
+                    dataSource={tourDetails?.photo}
+                    renderItem={(item) => (
+                        <List.Item>
+                            <Image
+                                width={200}
+                                height={200}
+                                src={item}
+                                alt={item}
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </List.Item>
+                    )}
+                />
+            ),
+            disabled:true
+        }
     ];
 
     return(
@@ -125,39 +199,32 @@ export default function TourDetails()
                         title: 'Tour Details',
                     },
                     ]}
+            />
+
+            <br />
+            <div>
+                <Image 
+                    width="100%" 
+                    preview={false}
+                    src={tourDetails?.bannerImageUrl}
+                    style={{
+                        width:"100%",
+                        // height:"300px",
+                        objectFit: "cover",// Prevent distortion
+
+
+                    }}
                 />
-
-                <br />
-                <div>
-                    <Image 
-                        width="100%" 
-                        preview={false}
-                        src={tourDetails?.bannerImageUrl}
-                        style={{
-                            width:"100%",
-                            // height:"300px",
-                            objectFit: "cover",// Prevent distortion
-
-
-                        }}
-                    />
-                </div>
+            </div>
             <Row
                 style={{backgroundColor:""}}
             >
                 <Col span={24}>
-                    
-                    
-                   
-                    
+                
                     <Card
                         title={tourDetails?.title}
                     >
-                        <Tabs title="TABB" defaultActiveKey="1" items={tabItems} />
-
-                        <br />
-                        <Button type="primary">Edit Details</Button>
-
+                        <Tabs title="TABB" defaultActiveKey="1" items={activitiesTabItems} />
                     </Card>
                     
                 </Col>

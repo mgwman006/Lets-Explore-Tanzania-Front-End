@@ -361,9 +361,9 @@ export default function AddTour()
                     onFinish={(values) => {submitPickUpInformation(values)}}
                 >
                     <Form.Item
-                        label="Pick Up Location (Ideal Location, may vary)"
+                        label="Pick Up Location (Optional)"
                         name="location"
-                        rules={[{ required: true, message: 'Please enter pick up location!' }]}
+                        rules={[{ required: false, message: 'Please enter pick up location!' }]}
                     >
                         <Input maxLength={100} showCount />
                     </Form.Item>
@@ -401,8 +401,6 @@ export default function AddTour()
                 <>
                 {tourGuideCurrentStep === 1 && (
                     <>
-                        <Tag color="red">{`${tourActivitisies.length}/${createdTour?.durationDays} day(s) Added`}</Tag>
-                        <br />
                         <List<TourActivityDTO>
                             bordered
                             size="small"
@@ -551,9 +549,9 @@ export default function AddTour()
                     onFinish={(values) => {submitEndOfTourInformation(values)}}
                 >
                     <Form.Item
-                        label="Dearture point (Ideal Location, may vary)"
+                        label="Dearture point (optional)"
                         name="location"
-                        rules={[{ required: true, message: 'Please enter location!' }]}
+                        rules={[{ required: false, message: 'Please enter location!' }]}
                     >
                         <Input maxLength={100} showCount />
                     </Form.Item>
@@ -588,7 +586,7 @@ export default function AddTour()
             icon: tourGuideCurrentStep==3 ?<SmileOutlined /> : "",
             description:(
                 <div
-                                        hidden = {tourGuideCurrentStep != 3}
+                    hidden = {tourGuideCurrentStep != 3}
 
                 >
                     <Result
@@ -778,90 +776,9 @@ export default function AddTour()
                     items={tourGuideSteps}
                 />
                
-                // <Flex vertical>
-                //     <Steps
-                //         // progressDot
-                //         direction="horizontal"
-                //         current={tourActivitisies.length}
-                //         items={
-                //             Array.from(
-                //                 { length: numberOfDays }, 
-                //                 (_, i) => ({
-                //                     title: i === 0 ? "On Arrival" : i === numberOfDays - 1 ? "End of Tour" : `Day ${i}`
-                //                 })
-                //             )
-                //         }
-                //         style={{ marginBottom: '20px' }}
-                //     />
-
-                //     <br />
-                
-                  
-                //     {!hideTourActivitiyForm && 
-                //         (
-                //             
-                //     {hideTourActivitiyForm &&
-                //         (
-                //             <>
-                //             <Alert message="You have added all activities for this tour. You can not add more activities." type="warning" showIcon />
-                //             <br />
-                //             <Button
-                //                 color="green"
-                //                 variant="solid"
-                //                 onClick={() => setCurrent(current+1)}
-                //                 >NEXT <RightOutlined /></Button>
-                //             </>
-                //         )
-                //     }
-                
-
-                    
-                
-                
-                // </Flex>
             )
                 
-        }
-        // ,
-        // {
-        //     title: 'Add Photos',
-        //     content: (
-
-
-        //         <div style={
-        //                 {
-        //                     display:"flex", 
-        //                     flexDirection:"column", 
-        //                     alignItems:"center",
-        //                     gap:"20px"
-        //                 }
-        //             }>
-                    
-        //             <div>
-        //                 <Upload
-        //                 {...propsMoreImages}
-        //                 >
-
-        //                     {fileList.length >= 8 ? null : 
-        //                         (<div>
-        //                             <p>+</p>
-        //                             <p>Upload</p>
-        //                         </div>)}
-
-        //                 </Upload>
-        //             </div>
-                    
-        //             <div hidden={fileListMultiplePhotos.length==0}>
-        //                 <Button loading={loading} size="large" variant="solid" color="green" onClick={handleSubmitMorePhotoes}>Submit</Button>
-        //             </div>
-                    
-
-        //         </div>
-                    
-                
-        //     ),
-        // }
-        ,
+        },
         {
             title:"Done",
             content: (

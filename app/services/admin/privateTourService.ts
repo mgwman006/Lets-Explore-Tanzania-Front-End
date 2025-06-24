@@ -270,3 +270,26 @@ export const addEndOfTourInformation = async (tourGuideId: number,endOfTourInfor
 
     }
 }
+
+export const getTourGuideDetails = async (tourId: number) => {
+  
+    try {
+        const response = await api.get<ApiResponse<TourGuideDTO>>(`/tour/private/${tourId}/guide`);
+        return response.data;
+      
+    } catch (error) {
+      const data : ApiResponse<TourGuideDTO> = {
+        success: false,
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: {
+            id:0,
+            pickUpInformation:{details:"",location:"",dateTime:""},
+            endOfTourInformation:{details:"",location:"",dateTime:""},
+            tourActivities:[],
+        },
+        statusCode: 0
+      }
+      return data;
+
+    }
+};
