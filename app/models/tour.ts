@@ -1,54 +1,103 @@
 
-interface TourListItemDto
+interface PrivateTourListItemDto
 {
     id:number,
     title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string,
-    hasSpecificDates:boolean,
-    tourDates:TourDate
+    destination:string[],
+    tourPrice: TourPriceDTO[],
 }
 
-interface AddTourDto
+interface PrivateTourAddDto
 {
     title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
-    destination:string,
-    hasSpecificDates:boolean,
-    tourDates?:TourDate
+    destinations:string[],
 }
 
-interface CreatedTourDto
+interface PrivateTourCreatedDto
 {
     id:number,
     title:string,
-    description:string,
-    pricePerPerson: number,
-    duration:number,
-    isAvailableAllTheTime:boolean,
-    destination:string,
-}
-
-interface TourDetailsDto
-{
-    id:number,
-    title:string,
-    description:string,
-    pricePerPerson: number,
+    overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string,
-    photos:String[],
-    hasSpecificDates: boolean,
-    tourDates: TourDate
+    destinations:string[],
+}
+
+interface PrivateTourDetailsDto
+{
+    id:number,
+    title:string,
+    overView:string,
+    durationDays:number,
+    bannerImageUrl:string,
+    destinations:string[],
+    tourPrice: TourPriceDTO[],
+    photo:string[]
 }
 
 interface TourDate{
     startDate:String,
     endDate:String
+}
+
+interface CurrencyDTO
+{
+    code:string,
+    symbol:string
+}
+
+interface AddTourPriceDTO{
+    quantity: number,
+    pricePerPerson: number,
+    currency: string
+}
+
+interface TourPriceDTO{
+    id: number,
+    quantity: number,
+    pricePerPerson: number,
+    currency: CurrencyDTO
+}
+
+interface AddTourActivityDTO
+{
+    dayNumber: number,
+    title: string,
+    description: string,
+    location: string,
+    startTime: string,
+    endTime: string,
+
+}
+
+interface TourActivityDTO
+{
+    id: number,
+    dayNumber: number,
+    title: string,
+    description: string,
+    location: string,
+    startTime: string,
+    endTime: string,
+    photos: string[]
+}
+
+interface MeetingPoint
+{
+    details: string,
+    location: string,
+    dateTime: string,
+}
+
+interface TourGuideDTO
+{
+    id: number,
+    pickUpInformation: MeetingPoint,
+    endOfTourInformation: MeetingPoint,
+    tourActivities: TourActivityDTO[]
 }

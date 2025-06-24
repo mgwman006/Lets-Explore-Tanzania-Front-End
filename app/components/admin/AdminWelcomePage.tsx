@@ -3,14 +3,14 @@ import { Button, Col, Progress, Row, Image, Layout, Menu, Drawer, Typography, Fl
 import { RightOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTours } from '../../services/admin/tourServices';
+import { getPrivateTours} from '../../services/admin/privateTourService';
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 export default function AdminWelcomePage() {
 
     const navigate = useNavigate();
-    const [tours, setTours] = useState<TourListItemDto[]>([]);
+    const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
     const [notificationApi, notificationContextHolder] = notification.useNotification();
 
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
@@ -21,7 +21,7 @@ export default function AdminWelcomePage() {
 
     useEffect(() => {
         // You can add side effects here if needed
-        getTours().then(
+        getPrivateTours().then(
             (apiResponse) => {
                 if(apiResponse?.success)
                 {
