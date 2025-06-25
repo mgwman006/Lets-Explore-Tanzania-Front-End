@@ -58,6 +58,7 @@ export const createPrivateTour = async (userData: FormData) => {
       message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
       data: {
           id:0,
+          tourGuideId:0,
           title:"",
           overView:"",
           durationDays:0,
@@ -201,12 +202,12 @@ export const addTourPrices = async (tourId: number,tourPrices : AddTourPriceDTO[
   
 };
 
-export const addTourActivity = async (tourId: number,formData:FormData) => {
+export const addTourActivity = async (tourGuideId: number,formData:FormData) => {
   
     
       try {
           
-          const photoResponse = await api.post<ApiResponse<TourActivityDTO[]>>(`/tour/private/${tourId}/activity`, formData, 
+          const photoResponse = await api.post<ApiResponse<TourGuideDTO>>(`/tour/guide/${tourGuideId}/activity`, formData, 
           {
               headers: {'Content-Type': 'multipart/form-data'},
           }
@@ -215,10 +216,15 @@ export const addTourActivity = async (tourId: number,formData:FormData) => {
           return photoResponse.data;
         
       } catch (error) {
-        const data : ApiResponse<TourActivityDTO[]> = {
+        const data : ApiResponse<TourGuideDTO> = {
           success: false,
           message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
-          data: [],
+          data: {
+              id:0,
+              pickUpInformation:{details:"",location:"",dateTime:""},
+              endOfTourInformation:{details:"",location:"",dateTime:""},
+              tourActivities:[]
+          },
           statusCode: 0
         }
         return data;
@@ -226,10 +232,10 @@ export const addTourActivity = async (tourId: number,formData:FormData) => {
       }
 };
 
-export const createTourGuide = async (tourId: number,pickUpInformation: MeetingPoint) => {
+export const addPickUpInformation = async (tourGuideId: number,pickUpInformation: MeetingPoint) => {
   
     try {
-        const response = await api.post<ApiResponse<TourGuideDTO>>(`/tour/private/${tourId}/guide`, pickUpInformation);
+        const response = await api.post<ApiResponse<TourGuideDTO>>(`/tour/guide/${tourGuideId}/point/start`, pickUpInformation);
         return response.data;
       
     } catch (error) {
@@ -252,17 +258,18 @@ export const createTourGuide = async (tourId: number,pickUpInformation: MeetingP
 export const addEndOfTourInformation = async (tourGuideId: number,endOfTourInformation: MeetingPoint) => {
   
     try {
-        const response = await api.post<ApiResponse<MeetingPoint>>(`/tour/private/guide/${tourGuideId}/point/end`, endOfTourInformation);
+        const response = await api.post<ApiResponse<TourGuideDTO>>(`/tour/guide/${tourGuideId}/point/end`, endOfTourInformation);
         return response.data;
       
     } catch (error) {
-      const data : ApiResponse<MeetingPoint> = {
+      const data : ApiResponse<TourGuideDTO> = {
         success: false,
         message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
         data: {
-            details:"",
-            location:"",
-            dateTime: ""
+            id:0,
+            pickUpInformation:{details:"",location:"",dateTime:""},
+            endOfTourInformation:{details:"",location:"",dateTime:""},
+            tourActivities:[]
         },
         statusCode: 0
       }
@@ -292,4 +299,53 @@ export const getTourGuideDetails = async (tourId: number) => {
       return data;
 
     }
+};
+
+export const updatePrivateTour = async (tourId:number,updateData: UpdateTourDetailsDTO) => {
+  try {
+
+    const response = await api.put<ApiResponse<PrivateTourDetailsDto>>(
+        `/tour/private/${tourId}`,
+        updateData
+    );
+    return response.data;
+
+    
+  } catch (error) {
+    const data : ApiResponse<PrivateTourDetailsDto> = {
+      success: false,
+      message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+      data: {
+        id: 0,
+        title: "",
+        overView: "",
+        durationDays: 0,
+        bannerImageUrl: "",
+        destinations: [],
+        tourPrice: [],
+        photo: []
+      },
+      statusCode: 0
+    }
+    return data;
+  }
+};
+
+export const deleteTourPrice = async (tourId:number, tourPriceId: number) => {
+  try {
+
+    const response = await api.delete<ApiResponse<TourPriceDTO[]>>(
+        `/tour/private/${tourId}/prices/${tourPriceId}`);
+    return response.data;
+
+    
+  } catch (error) {
+    const data : ApiResponse<TourPriceDTO[]> = {
+      success: false,
+      message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+      data: [],
+      statusCode: 0
+    }
+    return data;
+  }
 };
