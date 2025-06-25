@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps } from 'antd';
+import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm } from 'antd';
 import Meta from "antd/es/card/Meta";
-import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, EnvironmentOutlined, EnvironmentTwoTone, FieldTimeOutlined, LikeOutlined, MoneyCollectTwoTone, UploadOutlined } from '@ant-design/icons';
+import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnvironmentOutlined, EnvironmentTwoTone, FieldTimeOutlined, LikeOutlined, MoneyCollectTwoTone, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { getCurrencies, getDestinations, getPrivateTourDetails, getTourGuideDetails, updatePrivateTour } from "../../services/admin/privateTourService";
+import { addTourPrices, deleteTourPrice, getCurrencies, getDestinations, getPrivateTourDetails, getTourGuideDetails, updatePrivateTour } from "../../services/admin/privateTourService";
 import TextArea from "antd/es/input/TextArea";
 import ImgCrop from "antd-img-crop";
 import { Update } from "vite/types/hmrPayload.js";
@@ -24,8 +24,45 @@ export default function TourDetails()
     const [apiNotification, notificationContextHolder] = notification.useNotification();
     const [destinationsOptions, setDestinationsOptions] = useState<string[]>([]);
     const [currencies, setCurrencies] = useState<CurrencyDTO[]>([]);
+    const [openPriceModal, setOpenPriceModal] = useState(false);
+    const [tourPriceForm] = Form.useForm<UpdateTourPriceDTO>();
 
 
+
+   
+    
+
+     function onSubmitTourPrice(values: AddTourPriceDTO): void {
+    
+        setConfirmLoading(true);
+        const pricesToadd: AddTourPriceDTO[] = [];
+        pricesToadd.push(values);
+
+        if (tourDetails?.id !== undefined) {
+            addTourPrices(tourDetails.id, pricesToadd).then(
+                (apiResponse) => {
+                    if(apiResponse.success)
+                    {
+                        
+                        setTourDetails({
+                            ...tourDetails,
+                            tourPrice: [...apiResponse.data] // or whatever new data you have
+                        });
+
+                        tourPriceForm.resetFields(); // Reset the form after submission
+                        openNotificationWithIcon('success', 'Tour prices added successfully.');
+                        setConfirmLoading(false);
+                    } else {
+                        openNotificationWithIcon('error', apiResponse.message);
+                    }
+                }
+            );
+        } else {
+            openNotificationWithIcon('error', 'Tour ID is undefined.');
+        }
+            
+            
+    }
 
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
         apiNotification[type]({
@@ -40,6 +77,14 @@ export default function TourDetails()
         form.setFieldValue("destinations", tourDetails?.destinations || []);
         setOpen(true);
     };
+
+    const showPriceModal = () => {
+        setOpenPriceModal(true);
+    };
+
+    const handleCancelTourPriceModel = () => {
+        setOpenPriceModal(false);
+    }
 
   
 
@@ -154,9 +199,9 @@ export default function TourDetails()
                     {notificationContextHolder}
                     <Flex   gap={"small"} >
                         <Button variant="outlined" color="green" size="small" onClick={showModal}>Update Details</Button>
-                        <Button variant="outlined" color="green" size="small">Update Price list</Button>
+                        <Button variant="outlined" color="green" size="small" onClick={showPriceModal}>Update Price list</Button>
                         <Modal
-                            title="Title"
+                            title="Update Tour Details"
                             centered
                             footer={null}
                             open={open}
@@ -232,6 +277,127 @@ export default function TourDetails()
                                 </Form.Item>
                         </Form>
                         </Modal>
+
+                        <Modal
+                            title="Update Price List"
+                            centered
+                            footer={null}
+                            open={openPriceModal}
+                            onCancel={handleCancelTourPriceModel}
+                             width={{
+                                xs: '90%',
+                                sm: '80%',
+                                md: '70%',
+                                lg: '60%',
+                                xl: '50%',
+                                xxl: '40%',
+                                }}
+                        >
+                            <Table
+                                title={() => <Typography.Title level={5}>Tour Price</Typography.Title>}
+                                style={{ marginTop: '20px' }}
+                                dataSource={tourDetails?.tourPrice}
+                                pagination={false}
+                                rowKey="id"
+                                columns={[
+                                    {
+                                        title: 'Quantity',
+                                        dataIndex: 'quantity',
+                                        key: 'quantity',
+                                    },
+                                    {
+                                        title: 'Price Per Person',
+                                        dataIndex: 'pricePerPerson',
+                                        key: 'pricePerPerson',
+                                    },
+                                    {
+                                        title: 'Currency',
+                                        dataIndex: ['currency', 'code'],
+                                        key: 'currencyCode',
+                                    },
+                                    {
+                                        title: 'Actions',
+                                        key: 'actions',
+                                        render: (_, record) => (
+                                           
+                                            <Popconfirm
+                                                key={record.id}
+                                                onConfirm={() => handleDeleteTourPrice(record.id )}
+                                                title={record.quantity + " - " + record.pricePerPerson + " " + record.currency.code}
+                                                description="Are you sure to delete this Tour?"
+                                                okText="Yes"
+                                                cancelText="No"
+                                            >
+                                                <DeleteOutlined key="setting" />
+                                            </Popconfirm>
+                                        ),
+                                    },
+                                ]}
+                            />
+                            
+                
+                            <Form<AddTourPriceDTO>
+                                layout="vertical"
+                                name="basic"
+                                form={tourPriceForm}
+                                initialValues={{ remember: true }}
+                                onFinish={onSubmitTourPrice}
+                                autoComplete="on"
+                            >
+                                <Form.Item
+                                    label="Quantity"
+                                    name="quantity"
+                                    rules={[{ required: true, message: 'Please enter quantity!' }]}
+                                >
+                                    <InputNumber min={1}  style={{ width: '100%' }} />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Price Per Person"
+                                    name="pricePerPerson"
+                                    rules={[{ required: true, message: 'Please enter price per person' }]}
+                                >
+                                    <InputNumber min={1}  style={{ width: '100%' }}  />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="Currency"
+                                    name="currency"
+                                    rules={[{ required: true, message: 'Please select currency' }]}
+                                >
+                                    <Select
+                                        style={{ width: '100%' }}
+                                        options={currencies.map((currency) => ({
+                                            value: currency.code,
+                                            label: `${currency.symbol} (${currency.code})`,
+                                        }))}
+                                        placeholder="Select Currency"
+                                        allowClear
+                                    />
+                                </Form.Item>
+
+
+                                
+                                <Form.Item>
+                                    <Alert message="You can add multiple tour prices." type="warning" showIcon />
+                                </Form.Item>
+                                
+                                <Form.Item label={null}>
+                                    <Button 
+                                        type="primary" 
+                                        
+                                        htmlType="submit" 
+                                        loading={confirmLoading}
+                                    > 
+                                        Add Tour Price <PlusOutlined />
+                                    </Button>
+                                </Form.Item>
+                                    
+                            </Form>
+
+                        </Modal>
+
+
                     </Flex>
                     <p><EnvironmentTwoTone /> {tourDetails?.destinations?.join(", ")} <br /><ClockCircleTwoTone /> {tourDetails?.durationDays} Days</p>
                     <Meta
@@ -359,6 +525,50 @@ export default function TourDetails()
             disabled:true
         }
     ];
+
+
+
+    const handleDeleteTourPrice = (tourPriceId: number) => 
+        new Promise((resolve) => 
+        {
+            setTimeout(
+                () =>
+                {
+                    if (tourDetails?.id !== undefined) {
+                        deleteTourPrice(tourDetails.id, tourPriceId).then(
+                            (apiResponse) => {
+                                if(apiResponse.success)
+                                {
+                                    
+                                    setTourDetails({
+                                        ...tourDetails,
+                                        tourPrice: [...apiResponse.data] // or whatever new data you have
+                                    });
+
+                                    openNotificationWithIcon('success', 'Tour price removed successfully.');
+                                    setConfirmLoading(false);
+                                } else {
+                                    openNotificationWithIcon('error', apiResponse.message);
+                                }
+                            }
+                        );
+                    } else {
+                        openNotificationWithIcon('error', 'Tour ID is undefined.');
+                    }
+
+                    resolve(null);
+                    
+                }
+                    , 
+                1000
+            );
+        }
+    );
+
+
+
+
+
 
     return(
         <div

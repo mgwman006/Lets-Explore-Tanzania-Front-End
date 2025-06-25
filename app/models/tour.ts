@@ -110,3 +110,9 @@ interface UpdateTourDetailsDTO
     durationDays: number,
     destinations: string[],
 }
+
+interface UpdateTourPriceDTO{
+    quantity: number,
+    pricePerPerson: number,
+    currency: string
+}

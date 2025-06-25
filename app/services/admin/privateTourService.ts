@@ -330,3 +330,22 @@ export const updatePrivateTour = async (tourId:number,updateData: UpdateTourDeta
     return data;
   }
 };
+
+export const deleteTourPrice = async (tourId:number, tourPriceId: number) => {
+  try {
+
+    const response = await api.delete<ApiResponse<TourPriceDTO[]>>(
+        `/tour/private/${tourId}/prices/${tourPriceId}`);
+    return response.data;
+
+    
+  } catch (error) {
+    const data : ApiResponse<TourPriceDTO[]> = {
+      success: false,
+      message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+      data: [],
+      statusCode: 0
+    }
+    return data;
+  }
+};
