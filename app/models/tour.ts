@@ -6,7 +6,7 @@ interface PrivateTourListItemDto
     overView:string,
     durationDays:number,
     bannerImageUrl:string,
-    destination:string[],
+    destinations:string[],
     tourPrice: TourPriceDTO[],
 }
 
@@ -21,6 +21,7 @@ interface PrivateTourAddDto
 interface PrivateTourCreatedDto
 {
     id:number,
+    tourGuideId:number,
     title:string,
     overView:string,
     durationDays:number,
@@ -100,4 +101,18 @@ interface TourGuideDTO
     pickUpInformation: MeetingPoint,
     endOfTourInformation: MeetingPoint,
     tourActivities: TourActivityDTO[]
+}
+
+interface UpdateTourDetailsDTO
+{
+    title: string,
+    overView: string,
+    durationDays: number,
+    destinations: string[],
+}
+
+interface UpdateTourPriceDTO{
+    quantity: number,
+    pricePerPerson: number,
+    currency: string
 }
