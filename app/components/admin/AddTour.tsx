@@ -1,9 +1,9 @@
-import { Alert, Breadcrumb, Button, Col, DatePicker, Drawer, Flex, Form, GetProp, Input, InputNumber, List, message, notification, Result, Row, Select, Space, Steps, Table, TableProps, Tag, Typography, Upload, UploadFile, UploadProps } from "antd";
+import { Alert, Breadcrumb, Button, Col, DatePicker, Drawer, Flex, Form, GetProp, Input, InputNumber, List, message, Modal, notification, Result, Row, Select, Space, Steps, Table, TableProps, Tag, Typography, Upload, UploadFile, UploadProps } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { useEffect, useState } from "react";
 import ImgCrop from 'antd-img-crop';
 import { EnvironmentOutlined, LoadingOutlined, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
-import { addBannerImage, addEndOfTourInformation, addPhotos, addTourActivity, addTourPrices, createPrivateTour, createTourGuide, getCurrencies, getDestinations } from "../../services/admin/privateTourService";
+import { addBannerImage, addEndOfTourInformation, addPhotos, addPickUpInformation, addTourActivity, addTourPrices, createPrivateTour, getCurrencies, getDestinations } from "../../services/admin/privateTourService";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
@@ -41,20 +41,18 @@ export default function AddTour()
     const [currencies, setCurrencies] = useState<CurrencyDTO[]>([]);
     const [tourPrices, setTourPrices] = useState<TourPriceDTO[]>([]);
     const [tourPriceForm] = Form.useForm<AddTourPriceDTO>();
-    const [tourActivitisies, setTourActivities] = useState<TourActivityDTO[]>([]);
     const [tourActivityForm] = Form.useForm<AddTourActivityDTO>();
     const [tourGuideCurrentStep, setTourGuideCurrentStep] = useState<number>(0);
     const [pickUpInformationForm] = Form.useForm<MeetingPoint>();
     const [endOfTourInformationForm] = Form.useForm<MeetingPoint>();
-    const [tourGuide, setTourGuide] = useState<TourGuideDTO | null>(null);
+    const [tourGuide, setTourGuide] = useState<TourGuideDTO>({} as TourGuideDTO);
     const [open, setOpen] = useState(false);
-
+    const [confirmLoading, setConfirmLoading] = useState(false);
 
     const { Option } = Select;
-
-    const showDrawer = () => {
+    const showModal = () => {
         tourActivityForm.setFieldsValue({
-            dayNumber: tourActivitisies.length+1,
+            dayNumber: tourGuide?.tourActivities?.length + 1 || 1, // Set to next day number
             title: "",
             description: "",
             startTime: "",
@@ -64,7 +62,9 @@ export default function AddTour()
         setOpen(true);
     };
 
-    const onClose = () => {
+
+    const handleCancel = () => {
+        console.log('Clicked cancel button');
         setOpen(false);
     };
 
@@ -174,15 +174,18 @@ export default function AddTour()
     }
 
     function submitTourActivity(values: AddTourActivityDTO) {
-        setLoading(true);
-        const formData = new FormData();
-        fileListMultiplePhotos.forEach((file, idx) => {
-            if (file.originFileObj) {
-                formData.append("images", file.originFileObj as File);
-            }
-        });
 
-        const activityToAdd: AddTourActivityDTO = {
+        setConfirmLoading(true);
+        setTimeout(() => {
+
+            const formData = new FormData();
+            fileListMultiplePhotos.forEach((file, idx) => {
+                if (file.originFileObj) {
+                    formData.append("images", file.originFileObj as File);
+                }
+            });
+
+            const activityToAdd: AddTourActivityDTO = {
                 ...values,
                 startTime: values.startTime ? values.startTime : "00:00",
                 endTime: values.endTime ? values.endTime : "00:00"
@@ -190,41 +193,47 @@ export default function AddTour()
 
         
         
-        formData.append("metadata", new Blob([JSON.stringify(activityToAdd)], { type: "application/json" }));
+            formData.append("metadata", new Blob([JSON.stringify(activityToAdd)], { type: "application/json" }));
      
-        if (tourGuide?.id !== undefined) {
-            
-            addTourActivity(tourGuide.id, formData).then(
-                (apiResponse) => {
-                    if(apiResponse.success)
-                    {
-                        setTourActivities(apiResponse.data);
-                        tourActivityForm.resetFields(); // Reset the form after submission
-                        tourActivityForm.setFieldsValue({
-                            dayNumber: apiResponse.data.length+1,
-                            title: "",
-                            description: "",
-                            startTime: "",
-                            endTime: "",
-                            location: ""
-                        });
-                        if (createdTour?.durationDays !== undefined && apiResponse.data.length >= createdTour.durationDays) {
-                            setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
+            if (tourGuide?.id !== undefined && createdTour?.tourGuideId !== undefined) {
+                
+                addTourActivity(createdTour.tourGuideId, formData).then(
+                    (apiResponse) => {
+                        if(apiResponse.success)
+                        {
+                            setTourGuide(apiResponse.data);
+                            tourActivityForm.resetFields(); // Reset the form after submission
+                            tourActivityForm.setFieldsValue({
+                                dayNumber: apiResponse.data.tourActivities.length+1,
+                                title: "",
+                                description: "",
+                                startTime: "",
+                                endTime: "",
+                                location: ""
+                            });
+                            if (createdTour?.durationDays !== undefined && apiResponse.data.tourActivities.length >= createdTour.durationDays) {
+                                setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
+                            }
+                            setOpen(false);
+                            setConfirmLoading(false);
+                            setFileListMultiplePhotos([]); // Clear the file list after submission
+                            openNotificationWithIcon('success', 'Tour activity added successfully.');
+                            
+                        } else {
+                            openNotificationWithIcon('error', apiResponse.message);
                         }
-                        
-                        setFileListMultiplePhotos([]); // Clear the file list after submission
-                        openNotificationWithIcon('success', 'Tour activity added successfully.');
-                        
-                    } else {
-                        openNotificationWithIcon('error', apiResponse.message);
                     }
-                }
-            );
-        } else {
-            openNotificationWithIcon('error', 'Tour ID or Tour Guide ID is undefined.');
-        }
+                );
 
-        setLoading(false);
+            } else {
+                openNotificationWithIcon('error', 'Tour ID or Tour Guide ID is undefined.');
+            }
+
+            
+
+        }, 1000);
+        
+
     }
 
     const propsUploadBannerImage: UploadProps = {
@@ -300,7 +309,7 @@ export default function AddTour()
         setLoading(true);
         setTimeout(() => {
             if (createdTour?.id !== undefined) {
-                createTourGuide(createdTour.id, values).then(
+                addPickUpInformation(createdTour.tourGuideId, values).then(
                     (apiResponse) => {
                         if (apiResponse.success) {
 
@@ -330,8 +339,7 @@ export default function AddTour()
                     (apiResponse) => {
                         if (apiResponse.success) {
 
-                            tourGuide.endOfTourInformation = apiResponse.data;
-                            setTourGuide(tourGuide);
+                            setTourGuide(apiResponse.data);
                             setTourGuideCurrentStep(tourGuideCurrentStep + 1); // Move to next step in tour guide steps
 
                             openNotificationWithIcon('success', 'Pick up information submitted successfully.');
@@ -405,7 +413,7 @@ export default function AddTour()
                             bordered
                             size="small"
                             header={<div>Tour Activities</div>}
-                            dataSource={tourActivitisies}
+                            dataSource={tourGuide?.tourActivities || []}
                             renderItem={(item, index) => (
                                 <List.Item key={item.id}>
                                     <Typography.Text strong>{`Day ${item.dayNumber}: ${item.title}`}</Typography.Text>
@@ -417,27 +425,26 @@ export default function AddTour()
                         <Button 
                             key="addActivity" 
                             type="primary" 
-                            onClick={showDrawer}
+                            onClick={showModal}
                             style={{ marginTop: 16 }}
                         >
-                            Add Day {tourActivitisies.length+1} Activity <PlusOutlined />
+                            Add Day {tourGuide.tourActivities.length+1} Activity <PlusOutlined />
                         </Button>
 
-                        <Drawer
-                            title="Add Tour Activity"
-                            width={720}
-                            onClose={onClose}
+
+                        <Modal
+                            title="Title"
                             open={open}
-                            styles={{
-                            body: {
-                                paddingBottom: 80,
-                            },
-                            }}
-                            extra={
-                            <Space>
-                                <Button onClick={onClose}>Cancel</Button>
-                            </Space>
-                            }
+                            footer={null}
+                            onCancel={handleCancel}
+                             width={{
+                                xs: '90%',
+                                sm: '80%',
+                                md: '70%',
+                                lg: '60%',
+                                xl: '50%',
+                                xxl: '40%',
+                                }}
                         >
                             <Form<AddTourActivityDTO>
                                 layout="vertical"
@@ -521,14 +528,15 @@ export default function AddTour()
 
                                 <Form.Item>
                                     <Flex justify="space-between" align="center" gap="10px">
-                                        <Button type="primary" htmlType="submit" loading={loading}>
+                                        <Button type="primary" htmlType="submit" loading={confirmLoading}>
                                             Add Activity
                                         </Button>
                                     </Flex>
 
                                 </Form.Item>
                             </Form>
-                        </Drawer>
+                        </Modal>
+                        
                     </>
                 )}
                 
@@ -641,6 +649,7 @@ export default function AddTour()
                     
                     <Form.Item
                         label="Destinations"
+                        name={"destinations"}
                         rules={[{ required: true, message: 'Please enter destination' }]}
                     >
                         <Select
