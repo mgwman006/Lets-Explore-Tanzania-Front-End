@@ -151,16 +151,67 @@ export default function Home() {
           <Col xs={24} sm={8} lg={8} xl={8} xxl={8}>
                 <h2>Contact Us</h2>
                 <p>
-                  <EnvironmentOutlined /> Address: Samora Ave, Dar es Salaam 50069, Tanzania <br />
+                  <EnvironmentOutlined /> Address: Samora Ave,<br />&nbsp;&nbsp;&nbsp;&nbsp; Dar es Salaam 50069,<br />&nbsp;&nbsp;&nbsp;&nbsp; Tanzania <br />
                   <MailOutlined /> letsexploretanzania@gmail.com <br /><PhoneOutlined /> +255 692 650 730
                   
                 </p>
-                <Flex vertical={false} gap={"small"}>
-                  <a target='_blank' href='https://youtube.com/@letsexploretanzania8611?si=TY2QV9D7xjbgWv3-'><YoutubeOutlined /></a>
-                  <a target='_blank' href='https://www.instagram.com/letsexploretanzania/'><InstagramOutlined /></a>
-                  <a target='_blank' href='https://www.facebook.com/letsexploretanzania'><LikeOutlined /></a>
-                  <a target='_blank' href='https://vm.tiktok.com/ZMrQXgCbL/'><TikTokOutlined /></a>
-                  <a target='_blank' href='https://whatsapp.com/channel/0029VaUrhBpKQuJRklQiFe1v'><WhatsAppOutlined /></a>
+                <Flex vertical={false} gap={"middle"}>
+                  <a 
+                    style={
+                      {
+                        color:"green",
+                        fontSize:"25px"
+                      }
+                    } 
+                    target='_blank' href='https://youtube.com/@letsexploretanzania8611?si=TY2QV9D7xjbgWv3-'
+                  >
+                    <YoutubeOutlined />
+                  </a>
+                  <a 
+                    style={
+                      {
+                        color:"green",
+                        fontSize:"25px"
+                      }
+                    } 
+                    target='_blank' 
+                    href='https://www.instagram.com/letsexploretanzania/'>
+                    <InstagramOutlined />
+                  </a>
+                  <a 
+                    style={
+                      {
+                        color:"green",
+                        fontSize:"25px"
+                      }
+                    } 
+                    target='_blank' 
+                    href='https://www.facebook.com/letsexploretanzania'>
+                    <LikeOutlined />
+                  </a>
+                  <a 
+                    style={
+                      {
+                        color:"green",
+                        fontSize:"25px"
+                      }
+                    } 
+                    target='_blank' 
+                    href='https://vm.tiktok.com/ZMrQXgCbL/'>
+                      <TikTokOutlined />
+                  </a>
+                  <a 
+                    style={
+                      {
+                        color:"green",
+                        fontSize:"25px"
+                      }
+                    } 
+                    target='_blank' 
+                    href='https://whatsapp.com/channel/0029VaUrhBpKQuJRklQiFe1v'
+                  >
+                    <WhatsAppOutlined />
+                  </a>
                 </Flex>
           </Col>
           <Col xs={24} sm={8} lg={8} xl={8} xxl={8}>
@@ -169,7 +220,7 @@ export default function Home() {
                 grid={{ gutter: 16, column: isMobile ? 2 : 3 }}
                 size="small"
                 dataSource={destinations}
-                renderItem={item => <List.Item><Link to={``}>{item}</Link></List.Item>}
+                renderItem={item => <List.Item><Link style={{color :"white"}} to={``}>{item}</Link></List.Item>}
               />
           </Col>
 
