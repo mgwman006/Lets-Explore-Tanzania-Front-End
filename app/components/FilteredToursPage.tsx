@@ -1,7 +1,7 @@
-import { Card, List, Select, Typography } from "antd";
+import { Button, Card, List, Select, Typography } from "antd";
 import { EnvironmentOutlined, MoneyCollectFilled, MoneyCollectOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { isMobile } from "react-device-detect";
 
 const { Title, Paragraph, Text, Link } = Typography;
@@ -13,6 +13,7 @@ export default function FilteredToursPage() {
   const [tours, setTours] = useState<PrivateTourListItemDto[]>(location.state?.tours || []);
   const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>(location.state?.filteredTours || []);
   const [destinations, setDestinations] = useState<string[]>(location.state?.destinations || []);
+  const navigate = useNavigate();
 
   const handleDestinationFilter = (value: string) => {
     if (value) {
@@ -24,6 +25,16 @@ export default function FilteredToursPage() {
     }
   }
 
+  const handleViewSafari = (value : PrivateTourListItemDto) => {
+    navigate(
+      "/tourdetails",
+       {
+        state:{
+          tourDetails:value
+        }
+      }
+    )
+  }
   
   return (
     <div>
@@ -48,13 +59,35 @@ export default function FilteredToursPage() {
         dataSource={filteredTours}
         renderItem={tour => (
           <List.Item>
-            <Card style={{ width: '100%' }}
+            <Card 
+            // style={{ width: '100%' }}
               cover={
                 <img
                   alt="tour"
                   src={tour.bannerImageUrl || 'https://via.placeholder.com/150'}
                   style={{ height: '200px', objectFit: 'cover' }}
                 />}
+                actions={
+                  [
+                    <div
+                      style={{
+                        paddingLeft:"20px",
+                        paddingRight:"20px"
+                      }}
+                    >
+                         <Button 
+                            block
+                            size="large"
+                            variant="solid"
+                            color="blue"
+                            onClick={() => handleViewSafari(tour)}
+                          >
+                            View Safari
+                          </Button>
+                    </div>
+                   
+                  ]
+                }
             >
               
                   <Typography>

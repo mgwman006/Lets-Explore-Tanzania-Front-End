@@ -1,7 +1,7 @@
 import FilteredToursPage from "./components/FilteredToursPage";
 import Home from "./components/Home";
 import HomePage from "./components/HomePage";
-import Projects from "./components/Projects";
+import TourDetails from "./components/TourDetails";
 
 const routes = [
   {
@@ -13,12 +13,12 @@ const routes = [
         Component: HomePage
       },
       {
-        path:"projects",
-        Component: Projects
-      },
-      {
         path:"filteredtours",
         Component: FilteredToursPage
+      },
+      {
+        path:"tourdetails",
+        Component: TourDetails
       }
     ]
   }
