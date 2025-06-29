@@ -150,9 +150,9 @@ export default function Home() {
         <Row>
           <Col xs={24} sm={8} lg={8} xl={8} xxl={8}>
                 <h2>Contact Us</h2>
-                <p>
-                  <EnvironmentOutlined /> Address: Samora Ave,<br />&nbsp;&nbsp;&nbsp;&nbsp; Dar es Salaam 50069,<br />&nbsp;&nbsp;&nbsp;&nbsp; Tanzania <br />
-                  <MailOutlined /> letsexploretanzania@gmail.com <br /><PhoneOutlined /> +255 692 650 730
+                <p style={{fontSize:"15px"}}>
+                  Samora Ave,<br />Dar es Salaam 50069,<br />Tanzania <br />
+                  letsexploretanzania@gmail.com <br />+255 692 650 730
                   
                 </p>
                 <Flex vertical={false} gap={"middle"}>
@@ -214,7 +214,7 @@ export default function Home() {
                   </a>
                 </Flex>
           </Col>
-          <Col xs={24} sm={8} lg={8} xl={8} xxl={8}>
+          {/* <Col xs={24} sm={8} lg={8} xl={8} xxl={8}>
              <h2>Destinations</h2>
              <List
                 grid={{ gutter: 16, column: isMobile ? 2 : 3 }}
@@ -222,13 +222,13 @@ export default function Home() {
                 dataSource={destinations}
                 renderItem={item => <List.Item><Link style={{color :"white"}} to={``}>{item}</Link></List.Item>}
               />
-          </Col>
+          </Col> */}
 
           
         </Row>
-        <Row style={{ textAlign: 'center', marginTop: '20px' }}>
+        <Row style={{ textAlign: 'center', marginTop: '20px', backgroundColor:"black" }}>
             <Col span={24}>
-              ©{new Date().getFullYear()} Created by <a href='https://www.tante.tz' target="_blank">tante.tz</a>
+              ©{new Date().getFullYear()} Built with love by <a href='https://www.tante.tz' target="_blank">tante.tz</a>
             </Col>
         </Row>
             
