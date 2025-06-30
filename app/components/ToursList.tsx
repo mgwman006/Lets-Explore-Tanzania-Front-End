@@ -3,7 +3,7 @@
 import { Button, Card, List, notification, Select, Typography } from "antd";
 import { EnvironmentOutlined, MoneyCollectFilled, MoneyCollectOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { isMobile } from "react-device-detect";
 import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
 import { getDestinations, getPrivateTours } from "../services/admin/privateTourService";
