@@ -395,7 +395,6 @@ export default function TourDetails()
         .catch(
             (error) =>
             {
-                alert("catch "+error);
                 setConfirmLoading(false);
                 openNotificationWithIcon('error','unknown error '+error);
             }
