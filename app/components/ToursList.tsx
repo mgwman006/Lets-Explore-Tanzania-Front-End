@@ -19,7 +19,6 @@ export default function ToursList() {
   const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
   const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>(location?.state?.filteredTours ?? []);
   const [destinations, setDestinations] = useState<string[]>([]);
-  const [filterByDestinationKey, setFilterByDestinationKey] = useState<string>(location?.state?.filterByDestinationKey ?? "");
   const [notificationApi, notificationContextHolder] = notification.useNotification();
   const navigate = useNavigate();
 
@@ -103,7 +102,6 @@ export default function ToursList() {
         header={
            <Select
               style={{width:"200px"}}
-              defaultValue={filterByDestinationKey}
               showSearch
               prefix={<EnvironmentOutlined />}
               size="large"
