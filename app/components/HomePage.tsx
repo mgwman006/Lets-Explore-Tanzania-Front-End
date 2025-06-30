@@ -93,9 +93,9 @@ export default function HomePage(){
     {
         return(<Image 
                 width={"100%"}
-                height={"500px"}
+                height={"600px"}
                 style={{
-                  objectFit:"contain"
+                  objectFit:"cover"
                 }}
                 preview={false} 
                 src={url}
@@ -107,7 +107,9 @@ export default function HomePage(){
       <div style={{width:"100%"}}>
         {notificationContextHolder}
 
-          <Flex vertical>
+          <Flex 
+            vertical
+          >
 
              {
                 isMobile ?(
@@ -151,11 +153,28 @@ export default function HomePage(){
                     )
                     :
                 (
-                  <Row>
-                      <Col span={24} style={{backgroundColor:"white"}}>
+                  <Row
+                    style={
+                      {
+                        
+                        backgroundImage: "url('/carousel/beach-2.jpg')",
+                        // backgroundRepeat: "no-repeat",
+                        backgroundSize: "cover",
+                        width: "100%",
+                        minHeight: "400px" 
+
+                      }
+                    }
+                  >
+                      <Col 
+                        span={24} 
+                        
+                      >
 
                           <Carousel 
-                            autoplay>
+                            autoplay
+                            arrows
+                          >
                             <div>
                               {CarouselImage("/carousel/tour3.JPG")}
                             </div>
@@ -164,13 +183,10 @@ export default function HomePage(){
                              { CarouselImage("kilimajaro1.jpg")}
                             </div>
                             <div>
-                              { CarouselImage("zanzibar2.jpg")}
-                            </div>
-                            <div>
                               { CarouselImage("serengeti1.jpg")}
                             </div>
                             <div>
-                                {CarouselImage("zanzbar1.jpg")}
+                                {CarouselImage("/carousel/beach-2.jpg")}
                             </div>
                             
                             <div>
@@ -193,24 +209,39 @@ export default function HomePage(){
                     </Row>
                 )
             }
-            <Flex 
-              vertical 
+           
+              <Typography.Title 
+                style={
+                  {
+                    textAlign:"center",
+                    fontFamily:"monospace"
+                  }
+                } 
+                level={3}
+              >
+                Karibu Tanzania
+              </Typography.Title>
+            
+            <Row 
+              justify={"center"}
+              style={
+                {
+                  padding:"10px"
+                }
+              }
             >
-              <Typography.Title style={{textAlign:"center"}}>Karibu Tanzania</Typography.Title>
-              <Flex 
-                gap={"small"} 
-                vertical
-                style={{ 
-                  textAlign:'center', 
-                  backgroundColor:"#f5f3ed", 
-                  padding:"20px"
-                  }}>
-                  <Select
+              <Col xs={24} sm={6} lg={6} xl={6} xxl={6}>
+                <Flex 
+                  vertical
+                  gap={"small"}
+                >
+                <Select
                     prefix={<EnvironmentOutlined />}
                     size="large"
                     placeholder="Where To"
                     onChange={(value) => handleDestinationFilter(value)}
                     options={destinations.map(dest => ({ value: dest, label: dest }))}
+                    
                   />
                   <Button 
                       size="large" 
@@ -221,8 +252,15 @@ export default function HomePage(){
                     {filteredTours.length} Tours <RightOutlined />
                   </Button>
               </Flex>
+              </Col>
               
-            </Flex>
+             
+            </Row>
+                  
+                  
+             
+              
+           
                 
 
           </Flex>
