@@ -59,11 +59,15 @@ export default function TourDetails()
                     if(apiResponse.success)
                     {
                         setTourDeatails(apiResponse.data);
-                        const sortedPrice = apiResponse.data.tourPrice.sort();
-                        const lastPrice = sortedPrice[sortedPrice.length-1];
-                        setPricePerPerson(lastPrice.pricePerPerson);
-                        setTravellers(lastPrice.quantity);
-                        setMinimumPricePerPerson(lastPrice.pricePerPerson);
+                        if(apiResponse.data.tourPrice.length > 0)
+                        {
+                            const sortedPrice = apiResponse.data.tourPrice.sort();
+                            const lastPrice = sortedPrice[sortedPrice.length-1];
+                            setPricePerPerson(lastPrice.pricePerPerson);
+                            setTravellers(lastPrice.quantity);
+                            setMinimumPricePerPerson(lastPrice.pricePerPerson);
+                        }
+                        
                     }else
                     {
                         openNotificationWithIcon('error', apiResponse.message);
@@ -515,10 +519,14 @@ export default function TourDetails()
                         <InputNumber 
                             onChange={(value : number | null) => {
                                 setTravellers(value??0);
-                                const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
-                                setPricePerPerson(pp as number);
-                                tourBookingForm.setFieldValue("pricePerPerson",pp);
-                                tourBookingForm.setFieldValue("totalPrice", (value??0) *pp)
+                                if(tourDetails && tourDetails?.tourPrice?.length>0)
+                                {
+                                    const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
+                                    setPricePerPerson(pp as number);
+                                    tourBookingForm.setFieldValue("pricePerPerson",pp);
+                                    tourBookingForm.setFieldValue("totalPrice", (value??0) *pp)
+                                }
+                                
                             }}
                             style={{ width:"100%"}} 
                         />
@@ -717,8 +725,12 @@ export default function TourDetails()
                                     value={travellers}
                                     onChange={(value) => {
                                         setTravellers(value as number);
-                                        const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
-                                        setPricePerPerson(pp as number);
+                                        if(tourDetails && tourDetails.tourPrice.length>0)
+                                        {
+                                            const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
+                                            setPricePerPerson(pp as number);
+                                        }
+                                        
 
                                     }}
                                 />
