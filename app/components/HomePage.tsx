@@ -13,10 +13,11 @@ export default function HomePage(){
     const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>([]);
+    const [filterByDestinationKey, setFilterByDestinationKey] = useState<string>("");
 
 
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
-        notification[type]({
+        notificationApi[type]({
         message: `${message}`,
         });
     };
@@ -43,16 +44,15 @@ export default function HomePage(){
         );
     }
 
-    const goToFilteredTours = () => {
+    const goToTours = () => {
         if (filteredTours.length > 0) {
             naigate(
-              '/filteredtours', 
+              '/tours', 
               { 
                 state: 
                 { 
-                  tours: tours,
-                  filteredTours: filteredTours,
-                  destinations: destinations, 
+                  filterByDestinationKey:filterByDestinationKey,
+                  filteredTours:filteredTours
                 } 
               });
         } else if (destinations.length > 0) {
@@ -63,15 +63,16 @@ export default function HomePage(){
     };
     
     const handleDestinationFilter = (value: string) => {
-        const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
-        setFilteredTours(filteredTours);
+      setFilterByDestinationKey(value);
+      const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
+      setFilteredTours(filteredTours);
     };
 
     useEffect(
       () =>
       {
-          getLatestTourData();
-          getDestinations().then(
+        getLatestTourData();
+        getDestinations().then(
             (apiResponse) => {
                 if(!apiResponse || !apiResponse.success || !apiResponse.data) {
                     openNotificationWithIcon('error', 'Failed to fetch destinations');
@@ -156,10 +157,6 @@ export default function HomePage(){
                   <Row
                     style={
                       {
-                        
-                        backgroundImage: "url('/carousel/beach-2.jpg')",
-                        // backgroundRepeat: "no-repeat",
-                        backgroundSize: "cover",
                         width: "100%",
                         minHeight: "400px" 
 
@@ -247,7 +244,7 @@ export default function HomePage(){
                       size="large" 
                       variant="solid" 
                       color="green"
-                      onClick={goToFilteredTours}
+                      onClick={goToTours}
                   > 
                     {filteredTours.length} Tours <RightOutlined />
                   </Button>
