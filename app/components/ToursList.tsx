@@ -53,6 +53,7 @@ export default function ToursList() {
   }
 
   const handleDestinationFilter = (value: string) => {
+    alert(value);
       const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
       setFilteredTours(filteredTours);
     };
