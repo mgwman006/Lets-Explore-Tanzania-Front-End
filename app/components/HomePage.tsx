@@ -53,8 +53,6 @@ export default function HomePage(){
                   filteredTours:filteredTours
                 } 
               });
-        } else if (destinations.length > 0) {
-            openNotificationWithIcon('warning', 'No tours found for the selected destination');
         } else {
             openNotificationWithIcon('warning', 'Please select a destination');
         }
