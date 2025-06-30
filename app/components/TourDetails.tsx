@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline, Drawer, Steps, Result, GetProps } from 'antd';
+import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline, Drawer, Steps, Result, GetProps, Collapse } from 'antd';
 import Meta from "antd/es/card/Meta";
-import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, LoadingOutlined, MoneyCollectTwoTone, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
+import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnterOutlined, EnvironmentFilled, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, LoadingOutlined, MoneyCollectTwoTone, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { addBooking, getTourGuideDetails, sendOtp, updatePrivateTour, verifyEmail, verifyOtp } from "../services/admin/privateTourService";
 import { isMobile } from "react-device-detect";
@@ -173,71 +173,74 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
             label: 'Activities',
             children: (
                        
-                        
+                        <Collapse 
+                            accordion 
+                            defaultActiveKey={'1'}
+                            items={
+                                [
+                                    {
+                                        key:"1",
+                                        label: 'On Arival',
+                                        children: <p>{tourGuide?.pickUpInformation.details}</p>
+                                    },
+                                    {
+                                        key:"2",
+                                        label: "Day to Day Activities",
+                                        children: (
+                                            <Timeline
+                                                items={
+                                                    (tourGuide?.tourActivities || [])
+                                                    .map
+                                                    ((activity, index) => 
+                                                            (
+                                                                {
+                                                                    children: 
+                                                                    (
+                                                                        <div>
+                                                                            <h3>Day {activity.dayNumber}: {activity.title}</h3>
+                                                                            <p><EnvironmentTwoTone /> {activity.location}</p>
+                                                                            <p> {activity.description}</p>
+                                                                            
+                                                                            <List
+                                                                                itemLayout="horizontal"
+                                                                                dataSource={activity.photos}
+                                                                                renderItem={
+                                                                                    (item) =>{
+                                                                                        return <Image 
+                                                                                            src={item} 
+                                                                                            height={60} 
+                                                                                            width={80}
+                                                                                            style={
+                                                                                                {
+                                                                                                    objectFit: "cover",
+                                                                                                }
+                                                                                            }
+                                                                                        />;
+                                                                                    }
+                                                                                }
+                                                                            />
 
-                         <Timeline
-                            items={[
-                            {
-                                color:"orange",
-                                dot: <EnvironmentOutlined/>,
-                                // label:"On Arrival",
-                                children: (
-                                    <Meta 
-                                        title = {<h3>On Arival</h3>}
-                                        description={tourGuide?.pickUpInformation.details}
-                                    />
-                                )
-                            },
-                           
-                            ...(tourGuide?.tourActivities || []).map((activity, index) => ({
-                            children: (
-                                <div>
-                                    <h3>Day {activity.dayNumber}</h3>
-                                    <p > <span style={{fontSize:"18px"}}>{activity.title}</span> <br />
-                                    &nbsp;&nbsp;&nbsp;&nbsp; {activity.description}</p>
-                                    
-                                    <div>
-                                        <h5>Location/Destination</h5>
-                                        <ul>
-                                            <li><p>{activity.location}</p></li>
-                                        </ul>
-                                    </div>
-
-                                    <List
-                                        itemLayout="horizontal"
-                                        dataSource={activity.photos}
-                                        renderItem={
-                                            (item) =>{
-                                                return <Image 
-                                                    src={item} 
-                                                    height={60} 
-                                                    width={80}
-                                                    style={
-                                                        {
-                                                            objectFit: "cover",
-                                                        }
-                                                    }
-                                                />;
-                                            }
-                                        }
-                                    />
-
-                                </div>
-                                
-                            ),
-                            })),
-
-                            {
-                                color:"green",
-                                dot:<EnvironmentOutlined />,
-                                children: (
-                                    <Meta 
-                                        title = {<h3>End of Tour</h3>}
-                                        description={tourGuide?.endOfTourInformation.details}
-                                    />
-                                ),
-                            },
-                            ]}
+                                                                        </div>
+                                                            
+                                                                    ),
+                                                                }
+                                                            )
+                                                    )
+                                                
+                                                    
+                                                }
+                                            
+                                            />
+                                        )
+                                    },
+                                    {
+                                        key:"3",
+                                        label:"End of Tour",
+                                        children: <p>{tourGuide?.endOfTourInformation.details}</p>
+                                    }
+                                ]
+                            } 
+                            
                         />
                         
                 

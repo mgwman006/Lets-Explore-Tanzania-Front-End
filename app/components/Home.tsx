@@ -63,11 +63,11 @@ export default function Home() {
         (
           <Header
             style={{
-              position: 'sticky',
+              position: 'fixed',
               top: 0,
+              left:0,
               zIndex: 1,
               width: '100%',
-              
               backgroundColor:'white'
             
             }}
@@ -97,12 +97,8 @@ export default function Home() {
                 <div style={{  alignContent:'center'}}>
                   <Image preview={false}  src="logo1.jpg" width='100%'/> 
                 </div>
-                
             
             </Flex>            
-            
-            
-            
           
           </Header>
         )
@@ -110,8 +106,9 @@ export default function Home() {
         ( 
             <Header
               style={{
-                position: 'sticky',
+                 position: 'fixed',
                 top: 0,
+                left:0,
                 zIndex: 1,
                 width: '100%',
                 display: 'flex',
@@ -130,15 +127,18 @@ export default function Home() {
                 style={{ flex: 1, minWidth: 0 }}
               />
 
-              <Button type='primary' size='large'>Plan A Trip</Button>
+              {/* <Button type='primary' size='large'>Plan A Trip</Button> */}
             
             </Header>
         )
       }
-        
-      <Content >
+      
+      <Content 
+        style={{ paddingTop: "60px" }}
+      >
         <Outlet />
       </Content>
+
       <Footer
         style={{
           backgroundColor: '#393b3a',

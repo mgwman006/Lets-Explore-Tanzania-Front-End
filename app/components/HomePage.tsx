@@ -89,6 +89,20 @@ export default function HomePage(){
                   
       },[]);
 
+    function CarouselImage(url:string)
+    {
+        return(<Image 
+                width={"100%"}
+                height={"500px"}
+                style={{
+                  objectFit:"contain"
+                }}
+                preview={false} 
+                src={url}
+              />
+        )
+    }
+
     return(
       <div style={{width:"100%"}}>
         {notificationContextHolder}
@@ -99,8 +113,6 @@ export default function HomePage(){
                 isMobile ?(
                     <Row>
                       <Col span={24} style={{backgroundColor:"white"}}>
-                        <Flex vertical >
-
                           <Carousel 
                             autoplay>
                             <div>
@@ -134,100 +146,83 @@ export default function HomePage(){
                             </div>
                             
                           </Carousel>
-                          <Flex 
-                            vertical 
-                          >
-                            <Typography.Title style={{textAlign:"center"}}>Karibu Tanzania</Typography.Title>
-                            <Flex 
-                              gap={"small"} 
-                              vertical
-                              style={{ 
-                                textAlign:'center', 
-                                backgroundColor:"#f5f3ed", 
-                                padding:"20px"
-                                }}>
-                                <Select
-                                  prefix={<EnvironmentOutlined />}
-                                  size="large"
-                                  placeholder="Where To"
-                                  onChange={(value) => handleDestinationFilter(value)}
-                                  options={destinations.map(dest => ({ value: dest, label: dest }))}
-                                />
-                                <Button 
-                                    size="large" 
-                                    variant="solid" 
-                                    color="green"
-                                    onClick={goToFilteredTours}
-                                > 
-                                  {filteredTours.length} Tours <RightOutlined />
-                                </Button>
-                            </Flex>
-                            
-                          </Flex>
-                        </Flex>
                       </Col>
-                    </Row>)
+                    </Row>
+                    )
                     :
                 (
-                  <Row 
-                    align={"middle"}
-                    justify={"center"}
-                    
-                    style={
-                      { 
-                        height:"100vh", 
-                        background:"url(try.jpeg)",
-                        backgroundSize: "cover", 
-                        backgroundPosition: "center",
-                        // imageRendering: "auto",
-                        backgroundRepeat: "no-repeat" ,
-                        
-                          objectFit: "cover",
-                        
+                  <Row>
+                      <Col span={24} style={{backgroundColor:"white"}}>
 
-                      }
-                    }>
-                    
-                    
-                            <Col 
-                                span={12}
-                                style={{textAlign:'center'}} 
-                            >
-                          <Flex vertical align="center">
-                            <Flex 
-                              gap={"small"} 
-                              vertical={false} 
-                              style={{ textAlign:'center', backgroundColor:"#f5f3ed", padding:"20px"}}>
-                                
-                                <Select
-                                  prefix={<EnvironmentOutlined />}
-                                  size="large"
-                                  placeholder="Where To"
-                                  style={{ width: 200 }}
-                                  onChange={(value) => handleDestinationFilter(value)}
-                                  options={destinations.map(dest => ({ value: dest, label: dest }))}
-                                />
-
-                                <Button 
-                                  size="large" 
-                                  variant="solid" 
-                                  color="green"
-                                  onClick={goToFilteredTours}
-                                > 
-                                    {filteredTours.length} Tours <RightOutlined />
-                                </Button>
-                            </Flex>
-                            <Typography.Title style={{color:"yellow"}}>Karibu Tanzania</Typography.Title>
-                          </Flex>
+                          <Carousel 
+                            autoplay>
+                            <div>
+                              {CarouselImage("/carousel/tour3.JPG")}
+                            </div>
+                            <div>
+                              
+                             { CarouselImage("kilimajaro1.jpg")}
+                            </div>
+                            <div>
+                              { CarouselImage("zanzibar2.jpg")}
+                            </div>
+                            <div>
+                              { CarouselImage("serengeti1.jpg")}
+                            </div>
+                            <div>
+                                {CarouselImage("zanzbar1.jpg")}
+                            </div>
                             
-                      </Col>
-                      
+                            <div>
+                              {CarouselImage("/carousel/znz2.JPG")}
+                            </div>
+                           
+                            <div>
+                                {CarouselImage("/carousel/znz4.JPG")}
+                            </div>
+                            <div>
+                              {CarouselImage("/carousel/znz5.JPG")}
+                            </div>
+                            <div>
+                              {CarouselImage("/carousel/znz6.JPG")}
+                            </div>
+                            
+                          </Carousel>
                         
-                      
-                      
-                  </Row>
+                      </Col>
+                    </Row>
                 )
             }
+            <Flex 
+              vertical 
+            >
+              <Typography.Title style={{textAlign:"center"}}>Karibu Tanzania</Typography.Title>
+              <Flex 
+                gap={"small"} 
+                vertical
+                style={{ 
+                  textAlign:'center', 
+                  backgroundColor:"#f5f3ed", 
+                  padding:"20px"
+                  }}>
+                  <Select
+                    prefix={<EnvironmentOutlined />}
+                    size="large"
+                    placeholder="Where To"
+                    onChange={(value) => handleDestinationFilter(value)}
+                    options={destinations.map(dest => ({ value: dest, label: dest }))}
+                  />
+                  <Button 
+                      size="large" 
+                      variant="solid" 
+                      color="green"
+                      onClick={goToFilteredTours}
+                  > 
+                    {filteredTours.length} Tours <RightOutlined />
+                  </Button>
+              </Flex>
+              
+            </Flex>
                 
 
           </Flex>
