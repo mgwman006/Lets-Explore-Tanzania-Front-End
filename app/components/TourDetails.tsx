@@ -201,7 +201,9 @@ export default function TourDetails()
                                     {
                                         key:"1",
                                         label: 'On Arival',
-                                        children: <p>{tourGuide?.pickUpInformation?.details ?? ""}</p>
+                                        children: tourGuide && tourGuide.pickUpInformation && tourGuide.pickUpInformation.details ? 
+                                        <p>{tourGuide?.pickUpInformation?.details ?? ""}</p> :
+                                        <p>No pickUpInformation yet</p>
                                     },
                                     {
                                         key:"2",
@@ -256,7 +258,15 @@ export default function TourDetails()
                                     {
                                         key:"3",
                                         label:"End of Tour",
-                                        children: <p>{tourGuide?.endOfTourInformation?.details ?? ""}</p>
+                                        children: 
+                                            
+                                                tourGuide && tourGuide.endOfTourInformation && tourGuide.endOfTourInformation.details
+                                                ? 
+                                                (<p>{tourGuide.endOfTourInformation.details}</p> )
+                                                :
+                                                (<p>No End Of Info yet</p>)
+                                            
+                                        
                                     }
                                 ]
                             } 
@@ -684,7 +694,12 @@ export default function TourDetails()
                                         backgroundColor:"white"
                                     }}
                             >
-                                <p><span style={{fontSize:"25px"}}><b>{pricePerPerson}</b></span> pp ({tourDetails?.tourPrice[0].currency.code})</p>
+                                {
+                                    tourDetails && tourDetails.tourPrice.length>0 ?
+                                    <p><span style={{fontSize:"25px"}}><b>{pricePerPerson}</b></span> pp ({tourDetails?.tourPrice[0].currency.code})</p>:
+                                    <p>No price tag yet</p>
+                                }
+                                
                                 
 
                                 <DatePicker 
