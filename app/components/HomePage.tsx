@@ -13,7 +13,6 @@ export default function HomePage(){
     const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
     const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>([]);
-    const [filterByDestinationKey, setFilterByDestinationKey] = useState<string>("");
 
 
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
@@ -51,19 +50,17 @@ export default function HomePage(){
               { 
                 state: 
                 { 
-                  filterByDestinationKey:filterByDestinationKey,
                   filteredTours:filteredTours
                 } 
               });
-        } else if (destinations.length > 0) {
-            openNotificationWithIcon('warning', 'No tours found for the selected destination');
         } else {
             openNotificationWithIcon('warning', 'Please select a destination');
         }
     };
     
     const handleDestinationFilter = (value: string) => {
-      setFilterByDestinationKey(value);
+      alert(value);
+      alert(JSON.stringify(tours))
       const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
       setFilteredTours(filteredTours);
     };
