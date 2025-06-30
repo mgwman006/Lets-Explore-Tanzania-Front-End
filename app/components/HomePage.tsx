@@ -59,8 +59,6 @@ export default function HomePage(){
     };
     
     const handleDestinationFilter = (value: string) => {
-      alert(value);
-      alert(JSON.stringify(tours))
       const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
       setFilteredTours(filteredTours);
     };
