@@ -1,4 +1,8 @@
+import { Dayjs } from 'dayjs';
 import api from '../../api/api';
+import { BookingCreateDto, CreatedBookingDto } from '../../models/booking';
+import { TouristStatus } from '../../models/tourist';
+import { OtpVerificationRequestDTO } from '../../models/auth';
 
 export const addBannerImage = async (tourId: number,image: FormData) => {
   
@@ -348,4 +352,90 @@ export const deleteTourPrice = async (tourId:number, tourPriceId: number) => {
     }
     return data;
   }
+};
+
+
+export const addBooking = async (booking : BookingCreateDto) => {
+
+    try {
+        const response = await api.post<ApiResponse<CreatedBookingDto>>(`tour/booking`, booking);
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<CreatedBookingDto> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: {
+          id:0,
+          tourId:0,
+          customerName:"",
+          email:"",
+          pricePerPerson:0,
+          numberOfPeople:0,
+          totalPrice:0,
+          tourDate: new Dayjs,
+          specialRequests:"",
+          phoneNumber:"",
+          referenceNumber:""
+
+        },
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};
+
+export const verifyEmail = async (emailBody : { email:string}) => {
+
+    try {
+        const response = await api.post<ApiResponse<TouristStatus>>(`tourist/verify`, emailBody);
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<TouristStatus> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: TouristStatus.ERROR,
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};
+
+export const verifyOtp = async (otpVerificationBody : OtpVerificationRequestDTO) => {
+
+    try {
+        const response = await api.post<ApiResponse<string>>(`auth/otp/verify`, otpVerificationBody);
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<string> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: "",
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
+};
+
+export const sendOtp = async (emailBody : {email:string}) => {
+
+    try {
+        const response = await api.post<ApiResponse<string>>(`auth/otp/send`, emailBody);
+        return response.data;
+    } catch (error) {
+      const data : ApiResponse<string> = {
+        success: false, 
+        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        data: "",
+        statusCode: 0
+      }
+      return data;
+      
+    }
+  
 };

@@ -1,178 +1,74 @@
-import { Link, useLocation } from "react-router-dom";
-import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline } from 'antd';
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline, Drawer, Steps, Result, GetProps, Collapse } from 'antd';
 import Meta from "antd/es/card/Meta";
-import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, MoneyCollectTwoTone, PlusOutlined, UploadOutlined, UserAddOutlined } from '@ant-design/icons';
+import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnterOutlined, EnvironmentFilled, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, LoadingOutlined, MoneyCollectTwoTone, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { addEndOfTourInformation, addPickUpInformation, addTourActivity, addTourPrices, deleteTourPrice, getCurrencies, getDestinations, getPrivateTourDetails, getTourGuideDetails, updatePrivateTour } from "../services/admin/privateTourService";
-import TextArea from "antd/es/input/TextArea";
-import ImgCrop from "antd-img-crop";
-import { Update } from "vite/types/hmrPayload.js";
+import { addBooking, getTourGuideDetails, sendOtp, updatePrivateTour, verifyEmail, verifyOtp } from "../services/admin/privateTourService";
 import { isMobile } from "react-device-detect";
+import TextArea from "antd/es/input/TextArea";
+import { Dayjs } from "dayjs";
+import { BookingCreateDto, CreatedBookingDto } from "../models/booking";
+import { TouristStatus } from "../models/tourist";
+import { OtpVerificationRequestDTO } from "../models/auth";
+import dayjs from 'dayjs';
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
+type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
+
+
+
 
 export default function TourDetails()
 {
     const location = useLocation();
     const tourDetails : PrivateTourDetailsDto = location.state.tourDetails;
-    const [previewImage,setPreviewImage] = useState("");
     const [tourGuide, setTourGuide] = useState<TourGuideDTO>();
-    const [open, setOpen] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
-    const [form] = Form.useForm<UpdateTourDetailsDTO>();
-    const [selectedDestinations, setSelectedDestinations] = useState<string[]>([]);
     const [apiNotification, notificationContextHolder] = notification.useNotification();
-    const [destinationsOptions, setDestinationsOptions] = useState<string[]>([]);
-    const [currencies, setCurrencies] = useState<CurrencyDTO[]>([]);
-    const [openPriceModal, setOpenPriceModal] = useState(false);
-    const [tourPriceForm] = Form.useForm<UpdateTourPriceDTO>();
-    const [openMeetingPointModal, setOpenMeetingPointModal] = useState(false);
-    const [pickUpInformationForm] = Form.useForm<MeetingPoint>();
-    const [openEndPointModal, setOpenEndPointModal] = useState(false);
-    const [tourActivityForm] = Form.useForm<AddTourActivityDTO>();
-    const [openTourActivityModal, setOpenTourActivityModal] = useState(false);
-    const [fileListMultiplePhotos, setFileListMultiplePhotos] = useState<UploadFile[]>([]);
     const [travellers, setTravellers] = useState<number>(0);
     const [pricePerPerson, setPricePerPerson] = useState<number>(0);
     const [miniMumPricePerPerson, setMinimumPricePerPerson] = useState<number>(0);
-    
+    const [showBookNowButton, setShowBookButton] = useState<boolean>(true);
+    const [tourBookingForm] = Form.useForm<BookingCreateDto>();
+    const [openBookingModal, setOpenBookingModal] = useState(false);
+    const [tourDate, setTourDate] = useState<Dayjs>();
+    const [stepCurrent,setStepCurrent] = useState<number>(0);
+    const navigate = useNavigate();
+    const [createdBooking, setCreatedBooking] = useState<CreatedBookingDto>();
+    const [otpVerificationForm] = Form.useForm<OtpVerificationRequestDTO>();
+    const [bokingFormValues, setBookingFormValues] = useState<BookingCreateDto>();
+    const [otpVerificationFormValues, setOtpVerificationFormValues] = useState<OtpVerificationRequestDTO>();
+    const [resendOtpLoading, setResendOtpLoading] = useState<boolean>(false);
 
+    const range = (start: number, end: number) => {
+  const result = [];
+  for (let i = start; i < end; i++) {
+    result.push(i);
+  }
+  return result;
+};
 
-    const handleOpenActivityModel = () => {
-        setOpenTourActivityModal(true);
-        tourActivityForm.resetFields(); // Reset the form fields
-        tourActivityForm.setFieldsValue({
-            dayNumber: (tourGuide?.tourActivities?.length ?? 0) + 1, // Set the next day number
-            title: "",
-            description: "",
-            startTime: "00:00", // Default start time
-            endTime: "00:00", // Default end time
-            location: ""
-        });
-    };
-
-    function submitTourActivity(values: AddTourActivityDTO) {
-   
-           setConfirmLoading(true);
-           setTimeout(() => {
-   
-               const formData = new FormData();
-               fileListMultiplePhotos.forEach((file, idx) => {
-                   if (file.originFileObj) {
-                       formData.append("images", file.originFileObj as File);
-                   }
-               });
-   
-               const activityToAdd: AddTourActivityDTO = {
-                   ...values,
-                   startTime: values.startTime ? values.startTime : "00:00",
-                   endTime: values.endTime ? values.endTime : "00:00"
-               };
-   
-           
-           
-               formData.append("metadata", new Blob([JSON.stringify(activityToAdd)], { type: "application/json" }));
-        
-               if (tourGuide?.id !== undefined) {
-                   
-                   addTourActivity(tourGuide.id, formData).then(
-                       (apiResponse) => {
-                           if(apiResponse.success)
-                           {
-                               setTourGuide(apiResponse.data);
-                               tourActivityForm.resetFields(); // Reset the form after submission
-                               tourActivityForm.setFieldsValue({
-                                   dayNumber: apiResponse.data.tourActivities.length+1,
-                                   title: "",
-                                   description: "",
-                                   startTime: "",
-                                   endTime: "",
-                                   location: ""
-                               });
-                               setOpenTourActivityModal(false); // Close the modal after submission
-                               setConfirmLoading(false);
-                               setFileListMultiplePhotos([]); // Clear the file list after submission
-                               openNotificationWithIcon('success', 'Tour activity added successfully.');
-                               
-                           } else {
-                               openNotificationWithIcon('error', apiResponse.message);
-                           }
-                       }
-                   );
-   
-               } else {
-                   openNotificationWithIcon('error', 'Tour ID or Tour Guide ID is undefined.');
-               }
-   
-               
-   
-           }, 1000);
-           
-   
-    }
-
-    const propsMoreImages: UploadProps = {
-        fileList:fileListMultiplePhotos,
-        maxCount: 10,
-        listType: "picture-card",
-        
-        onRemove: (file) => {
-            setFileListMultiplePhotos(prev => prev.filter(item => item.uid !== file.uid));
-            return true;
-        }
-        ,
-        beforeUpload: (file) => {
-
-            if (!(file instanceof File)) {
-                openNotificationWithIcon("error","invalid file")
-                return false;
-            }
-
-            if (!file.type.startsWith('image/')) {
-                openNotificationWithIcon("error","only image allowed")
-
-                return false;
-            }
-            if (file.type.startsWith('image/svg+xml')) {
-                openNotificationWithIcon("error","SVG file not supported")
-                return false;
-             }
-            return true;
-        },
-        customRequest: ({ file, onSuccess}) =>
-        {
-                
-            setFileListMultiplePhotos(prev => [
-                ...prev,
-                {
-                    ...(file as UploadFile),
-                    uid: (file as any).uid || Date.now().toString(),
-                    name: (file as File).name,
-                    status: 'done',
-                    url: (file as any).url,
-                    originFileObj: file as any, // keep as any to satisfy UploadFile type
-                }
-            ]);
-            onSuccess?.('ok');
-            
-        },
-        onChange(info)
-        {
-            // alert("file "+info.file.error+" "+info.file.status);
-           
-        }
-    };
+const disabledDate: RangePickerProps['disabledDate'] = (current) => {
+  // Can not select days before today and today
+  return current && current < dayjs().endOf('day');
+};
     
     
-    
-   
-
     const openNotificationWithIcon = (type: NotificationType, message:string) => {
         apiNotification[type]({
         message: `${message}`,
         });
     };
 
+    const handleOpenTourBookingModal = () =>
+    {
+        tourBookingForm.setFieldValue("tourId", tourDetails.id);
+        tourBookingForm.setFieldValue("pricePerPerson",pricePerPerson);
+        tourBookingForm.setFieldValue("numberOfPeople",travellers);
+        tourBookingForm.setFieldValue("totalPrice",pricePerPerson*travellers);
+        tourBookingForm.setFieldValue("tourDate",tourDate);
+        setOpenBookingModal(true);
+    }
 
   
 
@@ -195,37 +91,36 @@ export default function TourDetails()
             console.error("Error fetching tour guide details:", error);
         });   
 
-        getDestinations().then(
-                    (apiResponse) => {
-                        if(apiResponse.success)
-                        {
-                            setDestinationsOptions(apiResponse.data);
-                        }
-                        else
-                        {
-                            openNotificationWithIcon('error',`${apiResponse.message}`);
-                        }
-                    }
-        );
-        
-        getCurrencies().then(
-            (apiResponse) => {
-                if(apiResponse.success)
-                {
-                    setCurrencies(apiResponse.data);
-                }
-                else
-                {
-                    openNotificationWithIcon('error',`${apiResponse.message}`);
-                }
-            }
-        );
 
         const sortedPrice = tourDetails.tourPrice.sort();
         const lastPrice = sortedPrice[sortedPrice.length-1];
         setPricePerPerson(lastPrice.pricePerPerson);
         setTravellers(lastPrice.quantity);
-        setMinimumPricePerPerson(lastPrice.pricePerPerson)
+        setMinimumPricePerPerson(lastPrice.pricePerPerson);
+
+
+        const handleScroll = () =>
+        {
+            const bookNowButton = document.getElementById("book-now-button");
+            if(bookNowButton)
+            {
+                const react = bookNowButton.getBoundingClientRect();
+                if(react.top < 0 || react.bottom > window.innerHeight)
+                {
+                    setShowBookButton(true);
+                }
+                else
+                {
+                    setShowBookButton(false);
+                }
+            }
+        }
+
+        window.addEventListener('scroll',handleScroll);
+        // return () => {
+        //     window.removeEventListener('scroll',handleScroll);
+        // };
+        setShowBookButton(false);
                 
     }, []);
 
@@ -278,71 +173,74 @@ export default function TourDetails()
             label: 'Activities',
             children: (
                        
-                        
+                        <Collapse 
+                            accordion 
+                            defaultActiveKey={'1'}
+                            items={
+                                [
+                                    {
+                                        key:"1",
+                                        label: 'On Arival',
+                                        children: <p>{tourGuide?.pickUpInformation.details}</p>
+                                    },
+                                    {
+                                        key:"2",
+                                        label: "Day to Day Activities",
+                                        children: (
+                                            <Timeline
+                                                items={
+                                                    (tourGuide?.tourActivities || [])
+                                                    .map
+                                                    ((activity, index) => 
+                                                            (
+                                                                {
+                                                                    children: 
+                                                                    (
+                                                                        <div>
+                                                                            <h3>Day {activity.dayNumber}: {activity.title}</h3>
+                                                                            <p><EnvironmentTwoTone /> {activity.location}</p>
+                                                                            <p> {activity.description}</p>
+                                                                            
+                                                                            <List
+                                                                                itemLayout="horizontal"
+                                                                                dataSource={activity.photos}
+                                                                                renderItem={
+                                                                                    (item) =>{
+                                                                                        return <Image 
+                                                                                            src={item} 
+                                                                                            height={60} 
+                                                                                            width={80}
+                                                                                            style={
+                                                                                                {
+                                                                                                    objectFit: "cover",
+                                                                                                }
+                                                                                            }
+                                                                                        />;
+                                                                                    }
+                                                                                }
+                                                                            />
 
-                         <Timeline
-                            items={[
-                            {
-                                color:"orange",
-                                dot: <EnvironmentOutlined/>,
-                                // label:"On Arrival",
-                                children: (
-                                    <Meta 
-                                        title = {<h3>On Arival</h3>}
-                                        description={tourGuide?.pickUpInformation.details}
-                                    />
-                                )
-                            },
-                           
-                            ...(tourGuide?.tourActivities || []).map((activity, index) => ({
-                            children: (
-                                <div>
-                                    <h3>Day {activity.dayNumber}</h3>
-                                    <p > <span style={{fontSize:"18px"}}>{activity.title}</span> <br />
-                                    &nbsp;&nbsp;&nbsp;&nbsp; {activity.description}</p>
-                                    
-                                    <div>
-                                        <h5>Location/Destination</h5>
-                                        <ul>
-                                            <li><p>{activity.location}</p></li>
-                                        </ul>
-                                    </div>
-
-                                    <List
-                                        itemLayout="horizontal"
-                                        dataSource={activity.photos}
-                                        renderItem={
-                                            (item) =>{
-                                                return <Image 
-                                                    src={item} 
-                                                    height={60} 
-                                                    width={80}
-                                                    style={
-                                                        {
-                                                            objectFit: "cover",
-                                                        }
-                                                    }
-                                                />;
-                                            }
-                                        }
-                                    />
-
-                                </div>
-                                
-                            ),
-                            })),
-
-                            {
-                                color:"green",
-                                dot:<EnvironmentOutlined />,
-                                children: (
-                                    <Meta 
-                                        title = {<h3>End of Tour</h3>}
-                                        description={tourGuide?.endOfTourInformation.details}
-                                    />
-                                ),
-                            },
-                            ]}
+                                                                        </div>
+                                                            
+                                                                    ),
+                                                                }
+                                                            )
+                                                    )
+                                                
+                                                    
+                                                }
+                                            
+                                            />
+                                        )
+                                    },
+                                    {
+                                        key:"3",
+                                        label:"End of Tour",
+                                        children: <p>{tourGuide?.endOfTourInformation.details}</p>
+                                    }
+                                ]
+                            } 
+                            
                         />
                         
                 
@@ -353,7 +251,350 @@ export default function TourDetails()
 
 
 
+    const verifyTourist = (values:BookingCreateDto) =>
+    {
+        setBookingFormValues(values);
+        setConfirmLoading(true);
+        const requestDto = {
+            email:values.email
+        };
 
+        verifyEmail(requestDto)
+        .then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    if(apiResponse.data == TouristStatus.EXIST)
+                    {
+                        //add booking
+                        handleSubmitBooking(values);
+                       
+                    }
+                    else if ( apiResponse.data == TouristStatus.NONEXISTENT)
+                    {
+                        //SEND OTP
+                        requestOtp(values.email);
+                    }
+                    else{
+                        //error
+                        openNotificationWithIcon('error',"unknown error");
+                    }
+                }
+                else{
+                    openNotificationWithIcon('error',apiResponse.message);
+                }
+                
+            }
+        ).catch( 
+            (error) =>
+            {
+                openNotificationWithIcon('error',error);
+                setConfirmLoading(false);
+            }
+        );
+    }
+
+
+    const handleSubmitBooking = (values: BookingCreateDto) => {
+        setConfirmLoading(true);
+        setTimeout(() => {
+
+            addBooking(values).then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    setCreatedBooking(apiResponse.data);
+                    openNotificationWithIcon('success',"booking created");
+                    setStepCurrent(2);
+                }else
+                {
+                    openNotificationWithIcon('error',apiResponse.message);
+                }
+                setConfirmLoading(false);
+                
+            }
+        ).catch(
+            (error) =>
+            {
+                openNotificationWithIcon('error',error);
+                setConfirmLoading(false);
+            }
+        );
+
+        },1000);
+       
+        
+        
+        
+    }
+
+    const sendOtpVerification = (values: OtpVerificationRequestDTO) => {
+        setOtpVerificationFormValues(values);
+        setConfirmLoading(true);
+        verifyOtp(values)
+        .then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    if(bokingFormValues)
+                    {
+                        handleSubmitBooking(bokingFormValues);
+                         setConfirmLoading(false);
+                    }
+                    else{
+                        openNotificationWithIcon('error', "For some reasons booking data is null");
+                         setConfirmLoading(false);
+                        return;
+                    }
+                        
+                    openNotificationWithIcon('success',"verified");
+                }
+                else{
+                    openNotificationWithIcon('error',apiResponse.message);
+                    setConfirmLoading(false);
+                }
+            }
+        )
+        .catch(
+            (error) =>
+            {
+                alert("catch "+error);
+                setConfirmLoading(false);
+                openNotificationWithIcon('error','unknown error '+error);
+            }
+        )
+    }
+
+    const requestOtp = (emailValue : string) => {
+        setConfirmLoading(true);
+        sendOtp(
+            {
+                email: emailValue
+            }
+        )
+        .then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    openNotificationWithIcon('success',"otp send");
+                    setStepCurrent(1);
+                    
+                }
+                else{
+                    openNotificationWithIcon('error',apiResponse.message);
+                }
+                setConfirmLoading(false);
+            }
+        )
+        .catch(
+            (error) =>
+            {
+                openNotificationWithIcon('error','unknown error '+error);
+                setConfirmLoading(false);
+            }
+        )
+    }
+
+    const resendOtp = (emailValue : string) => {
+        setResendOtpLoading(true);
+        sendOtp(
+            {
+                email: emailValue
+            }
+        )
+        .then(
+            (apiResponse) =>
+            {
+                if(apiResponse.success)
+                {
+                    openNotificationWithIcon('success',"otp send");
+                    setStepCurrent(1);
+                    
+                }
+                else{
+                    openNotificationWithIcon('error',apiResponse.message);
+                }
+                setResendOtpLoading(false);
+                
+            }
+        )
+        .catch(
+            (error) =>
+            {
+                setResendOtpLoading(false);
+                openNotificationWithIcon('error','unknown error '+error);
+            }
+        )
+    }
+
+    const stepsItems = [
+        {
+                        
+            title: 'Booking Details',
+            icon: <UserOutlined />,
+            content: 
+            (
+                <Form<BookingCreateDto>
+                    layout={"vertical"}
+                    form={tourBookingForm}
+                    onFinish={verifyTourist}
+                >
+                    <Form.Item 
+                        label="TourId"
+                        name="tourId"
+                    >
+                        <InputNumber disabled style={{ width:"100%"}}/>
+                    </Form.Item>
+                    <Form.Item 
+                        label="Name"
+                        name="customerName"
+                        rules={[{required:true, message:"user name is required"}]}
+                    >
+                        <Input type="text" />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Email"
+                        name="email"
+                        rules={[{required:true, message:"email is required"}]}
+                    >
+                        <Input type="email" />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Phone Number"
+                        name="phoneNumber"
+                        rules={[{required:true, message:"phoneNumber is required"}]}
+                    >
+                        <Input type="text" />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Price PerPerson"
+                        name="pricePerPerson"
+                        rules={[{required:true, message:"price is required"}]}
+                    >
+                        <InputNumber disabled style={{ width:"100%"}} />
+                    </Form.Item>
+                    <Form.Item 
+                        label="NumberOfPeople"
+                        name="numberOfPeople"
+                        rules={[{required:true, message:"number of people is required"}]}
+                    >
+                        <InputNumber 
+                            onChange={(value : number | null) => {
+                                setTravellers(value??0);
+                                const pp = tourDetails.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
+                                setPricePerPerson(pp as number);
+                                tourBookingForm.setFieldValue("pricePerPerson",pp);
+                                tourBookingForm.setFieldValue("totalPrice", (value??0) *pp)
+                            }}
+                            style={{ width:"100%"}} 
+                        />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Total Price"
+                        name="totalPrice"
+                        
+                    >
+                        <InputNumber style={{ width:"100%"}} disabled/>
+                    </Form.Item>
+
+                    <Form.Item 
+                        
+                        label="Tour Date"
+                        name="tourDate"
+                        rules={[{required:true, message:"date is required"}]}
+                    >
+                        <DatePicker 
+                            disabledDate={disabledDate}
+                            format="YYYY-MM-DD"
+                            style={{ width:"100%"}} 
+                        />
+                    </Form.Item>
+                    <Form.Item 
+                        label="Special Requests"
+                        name="specialRequests"
+                    >
+                        <TextArea 
+                            rows={4} 
+                            count={{
+                            show: true,
+                            max: 500,
+                            }}
+                        />
+                    </Form.Item>
+
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={confirmLoading}>Submit</Button>
+                    </Form.Item>
+                </Form>
+            )
+        },
+        {
+            title: 'Verification',
+            icon: <SolutionOutlined />,
+            content:(
+                <Form<OtpVerificationRequestDTO>
+                    layout={'vertical'}
+                    form={otpVerificationForm}
+                    onFinish={sendOtpVerification}
+                >
+                    <Form.Item
+                        name="email"
+                        label="Email"
+                        rules={[{required:true, message:"Email Value is Required"}]}
+                    >
+                        <Input type="email" />
+                    </Form.Item>
+                    <Form.Item
+                        name="otp"
+                        label="Otp"
+                        rules={[{required:true, message:"Otp value is required"}]}
+                    >
+                        <Input type="text" />
+                    </Form.Item>
+                    <Form.Item
+                    >
+                        <Flex vertical={false} gap={'small'}>
+                            <Button 
+                                loading={resendOtpLoading} 
+                                variant="solid"
+                                color="green" 
+                                onClick={() => resendOtp(tourBookingForm.getFieldValue('email'))}
+                            >
+                                Request New Otp
+                            </Button>
+                            <Button 
+                                loading={confirmLoading} 
+                                type="primary" 
+                                htmlType="submit"
+                            >
+                                Submit Otp
+                            </Button>
+                        </Flex>
+                        
+                    </Form.Item>
+                </Form>
+            )
+        },
+        {
+            title: 'Done',
+            icon: <SmileOutlined />,
+            content: (
+                <Result
+                    status="success"
+                    title="Your Booking Successfully Received!"
+                    subTitle={`Your Booking reference number is : ${createdBooking?.referenceNumber}`}
+                    extra={[
+                    <Button type="primary" onClick={() => navigate("/")}>Ok Done <RightOutlined /></Button>,
+                    ]}
+                />
+            )
+        },
+    ];
 
     return(
         <div
@@ -426,7 +667,10 @@ export default function TourDetails()
                                 
 
                                 <DatePicker 
+                                    disabledDate={disabledDate}
+                                    format="YYYY-MM-DD"
                                     size="large"
+                                    onChange={(date, datestring) => setTourDate(date)}
                                 />
                                 <InputNumber 
                                     addonBefore={<UserAddOutlined />} 
@@ -442,10 +686,36 @@ export default function TourDetails()
 
                                     }}
                                 />
-                                <Button size="large" type="primary">Book Now</Button>
+                                <Button 
+                                    id="book-now-button" 
+                                    size="large" 
+                                    type="primary" 
+                                    onClick={handleOpenTourBookingModal}>
+                                        Book Now
+                                </Button>
                             </Flex>
                             <br />
                         </Col>
+                        <Drawer
+                            mask={false}
+                            height={100}
+                            onClose={() => setShowBookButton(false)}
+                            placement="bottom"
+                            open={showBookNowButton}
+                            closable={false}
+                        >
+                            <Flex>
+                                    <Button 
+                                        type="primary" 
+                                        block 
+                                        size="large"
+                                        onClick={handleOpenTourBookingModal}
+                                    >
+                                        Book Now
+                                    </Button>
+                            </Flex>
+                            
+                        </Drawer>
                     </Row>
                         
                     
@@ -454,6 +724,42 @@ export default function TourDetails()
             </Row>
            
 
+            <Modal
+                
+                centered
+                footer={null}
+                title={
+                    (
+                        <Steps
+                            size="small"
+                            current={stepCurrent}
+                            items={stepsItems}
+                        />
+                    )
+                }
+                open={openBookingModal}
+                confirmLoading={confirmLoading}
+                onCancel={() =>{
+                    setOpenBookingModal(false);
+                    setStepCurrent(0);
+
+                } }
+                width={{
+                    xs: '90%',
+                    sm: '80%',
+                    md: '70%',
+                    lg: '60%',
+                    xl: '50%',
+                    xxl: '40%',
+                    }}
+            >
+                
+
+                
+                <div>{stepsItems[stepCurrent].content}</div>
+            </Modal>
+
         </div>
     );
 }
+
