@@ -117,7 +117,7 @@ export default function Home() {
               }}
             >
               <div className="demo-logo">
-                <Image preview={false}  src="logo1.jpg"/>
+                <Image preview={false}  src="/logo1.jpg"/>
               </div>
               <Menu
                 theme='light'

@@ -1,33 +1,66 @@
-import { Button, Card, List, Select, Typography } from "antd";
+
+
+import { Button, Card, List, notification, Select, Typography } from "antd";
 import { EnvironmentOutlined, MoneyCollectFilled, MoneyCollectOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { isMobile } from "react-device-detect";
+import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
+import { getDestinations, getPrivateTours } from "../services/admin/privateTourService";
 
 const { Title, Paragraph, Text, Link } = Typography;
 
-export default function FilteredToursPage() {
+type NotificationType = 'success' | 'info' | 'warning' | 'error';
+
+export default function ToursList() {
 
  // get data from the state passed from HomePage
   const location = useLocation();
-  const [tours, setTours] = useState<PrivateTourListItemDto[]>(location.state?.tours || []);
-  const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>(location.state?.filteredTours || []);
-  const [destinations, setDestinations] = useState<string[]>(location.state?.destinations || []);
+  const [tours, setTours] = useState<PrivateTourListItemDto[]>([]);
+  const [filteredTours, setFilteredTours] = useState<PrivateTourListItemDto[]>(location?.state?.filteredTours ?? []);
+  const [destinations, setDestinations] = useState<string[]>([]);
+  const [filterByDestinationKey, setFilterByDestinationKey] = useState<string>(location?.state?.filterByDestinationKey ?? "");
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
   const navigate = useNavigate();
 
-  const handleDestinationFilter = (value: string) => {
-    if (value) {
-      const filtered : PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
-      setFilteredTours(filtered);
-    }
-    else {
-      setFilteredTours(tours); // Reset to all tours if no filter is applied
-    }
+  
+  const openNotificationWithIcon = (type: NotificationType, message:string) => {
+      notificationApi[type]({
+      message: `${message}`,
+      });
+  };
+
+  const getLatestTourData = () =>
+  {
+    getPrivateTours().then(
+        (apiResponse) =>
+        {
+            if (apiResponse && apiResponse.message)
+            {
+                setTours(apiResponse.data);
+                setFilteredTours(apiResponse.data)
+
+            }
+            else if (apiResponse) 
+            {
+                openNotificationWithIcon("error",apiResponse.message)
+            }
+            else
+            {
+                openNotificationWithIcon("error","Failed to fetch tours: apiResponse is undefined")
+            }
+        }
+    );
   }
+
+  const handleDestinationFilter = (value: string) => {
+      const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
+      setFilteredTours(filteredTours);
+    };
 
   const handleViewSafari = (value : PrivateTourListItemDto) => {
     navigate(
-      "/tourdetails",
+      `/tours/${value.id}`,
        {
         state:{
           tourDetails:value
@@ -35,15 +68,42 @@ export default function FilteredToursPage() {
       }
     )
   }
+
+  
+  useEffect(
+    () =>
+    {
+      getLatestTourData();
+      getDestinations().then(
+          (apiResponse) => {
+              if(!apiResponse || !apiResponse.success || !apiResponse.data) {
+                  openNotificationWithIcon('error', 'Failed to fetch destinations');
+                  return;
+              }
+              if(apiResponse.success)
+              {
+                  setDestinations(apiResponse.data);}
+              else
+              {
+                  openNotificationWithIcon('error',`${apiResponse.message}`);
+              }
+          }
+      );  
+                
+  },[]);
   
   return (
     <div>
+      <NormalizeTrailingSlash />
+      {notificationContextHolder}
       <h1>Filtered Tours</h1>
      
       
       <List
         header={
            <Select
+              style={{width:"200px"}}
+              defaultValue={filterByDestinationKey}
               showSearch
               prefix={<EnvironmentOutlined />}
               size="large"
@@ -56,7 +116,7 @@ export default function FilteredToursPage() {
         // bordered
         grid={{ gutter: 16, column: isMobile ? 1 : 4 }}
         itemLayout="horizontal"
-        dataSource={filteredTours}
+        dataSource={filteredTours || []}
         renderItem={tour => (
           <List.Item>
             <Card 
@@ -123,6 +183,7 @@ export default function FilteredToursPage() {
           </List.Item>
         )}
       />
+
     </div>
   );
 }

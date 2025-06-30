@@ -3,7 +3,7 @@ import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsP
 import Meta from "antd/es/card/Meta";
 import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnterOutlined, EnvironmentFilled, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, LoadingOutlined, MoneyCollectTwoTone, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { addBooking, getTourGuideDetails, sendOtp, updatePrivateTour, verifyEmail, verifyOtp } from "../services/admin/privateTourService";
+import { addBooking, getPrivateTourDetails, getTourGuideDetails, sendOtp, updatePrivateTour, verifyEmail, verifyOtp } from "../services/admin/privateTourService";
 import { isMobile } from "react-device-detect";
 import TextArea from "antd/es/input/TextArea";
 import { Dayjs } from "dayjs";
@@ -11,6 +11,9 @@ import { BookingCreateDto, CreatedBookingDto } from "../models/booking";
 import { TouristStatus } from "../models/tourist";
 import { OtpVerificationRequestDTO } from "../models/auth";
 import dayjs from 'dayjs';
+import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
+import { useParams } from "react-router-dom";
+
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
@@ -20,8 +23,9 @@ type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
 
 export default function TourDetails()
 {
-    const location = useLocation();
-    const tourDetails : PrivateTourDetailsDto = location.state.tourDetails;
+    
+    const { tourId } = useParams();
+    const [tourDetails, setTourDeatails] = useState<PrivateTourDetailsDto>();
     const [tourGuide, setTourGuide] = useState<TourGuideDTO>();
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [apiNotification, notificationContextHolder] = notification.useNotification();
@@ -40,64 +44,54 @@ export default function TourDetails()
     const [otpVerificationFormValues, setOtpVerificationFormValues] = useState<OtpVerificationRequestDTO>();
     const [resendOtpLoading, setResendOtpLoading] = useState<boolean>(false);
 
-    const range = (start: number, end: number) => {
-  const result = [];
-  for (let i = start; i < end; i++) {
-    result.push(i);
-  }
-  return result;
-};
 
-const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-  // Can not select days before today and today
-  return current && current < dayjs().endOf('day');
-};
-    
-    
-    const openNotificationWithIcon = (type: NotificationType, message:string) => {
-        apiNotification[type]({
-        message: `${message}`,
-        });
-    };
 
-    const handleOpenTourBookingModal = () =>
-    {
-        tourBookingForm.setFieldValue("tourId", tourDetails.id);
-        tourBookingForm.setFieldValue("pricePerPerson",pricePerPerson);
-        tourBookingForm.setFieldValue("numberOfPeople",travellers);
-        tourBookingForm.setFieldValue("totalPrice",pricePerPerson*travellers);
-        tourBookingForm.setFieldValue("tourDate",tourDate);
-        setOpenBookingModal(true);
-    }
-
-  
-
- 
-    // Fetch tour details using the tourId from the location state
-    // This is a placeholder, you should replace it with your actual data fetching logic
-    // For example, you might use useEffect to fetch the data when the component mounts
-    useEffect(() => {
+     useEffect(() => {
+        
         
         // Fetch tour guide details if needed
-        getTourGuideDetails(tourDetails.id)
+        if(tourId)
+        {
+            getPrivateTourDetails(Number(tourId))
+            .then(
+                (apiResponse) =>
+                {
+                    if(apiResponse.success)
+                    {
+                        setTourDeatails(apiResponse.data);
+                        const sortedPrice = apiResponse.data.tourPrice.sort();
+                        const lastPrice = sortedPrice[sortedPrice.length-1];
+                        setPricePerPerson(lastPrice.pricePerPerson);
+                        setTravellers(lastPrice.quantity);
+                        setMinimumPricePerPerson(lastPrice.pricePerPerson);
+                    }else
+                    {
+                        openNotificationWithIcon('error', apiResponse.message);
+                    }
+                }
+            ).catch
+            (
+                (error) =>
+                {
+                    openNotificationWithIcon('error', error);
+                }
+            )
+
+            getTourGuideDetails(Number(tourId))
             .then((apiResponse) => {
             if (apiResponse.success) {
                 setTourGuide(apiResponse.data);
             } else {
-                console.error("Failed to fetch tour guide details:", apiResponse.message);
+                openNotificationWithIcon('error', apiResponse.message);
             }
-        })
-        .catch((error) => {
-            console.error("Error fetching tour guide details:", error);
-        });   
+            })
+            .catch((error) => {
+                openNotificationWithIcon('error', error);
+            });
+        }else{
 
-
-        const sortedPrice = tourDetails.tourPrice.sort();
-        const lastPrice = sortedPrice[sortedPrice.length-1];
-        setPricePerPerson(lastPrice.pricePerPerson);
-        setTravellers(lastPrice.quantity);
-        setMinimumPricePerPerson(lastPrice.pricePerPerson);
-
+        }
+           
 
         const handleScroll = () =>
         {
@@ -117,12 +111,48 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
         }
 
         window.addEventListener('scroll',handleScroll);
-        // return () => {
-        //     window.removeEventListener('scroll',handleScroll);
-        // };
+     
         setShowBookButton(false);
                 
     }, []);
+
+    const range = (start: number, end: number) => {
+    const result = [];
+    for (let i = start; i < end; i++) {
+        result.push(i);
+    }
+    return result;
+    };
+
+    const disabledDate: RangePickerProps['disabledDate'] = (current) => {
+    // Can not select days before today and today
+    return current && current < dayjs().endOf('day');
+    };
+    
+    
+    const openNotificationWithIcon = (type: NotificationType, message:string) => {
+        apiNotification[type]({
+        message: `${message}`,
+        });
+    };
+
+    const handleOpenTourBookingModal = () =>
+    {
+        tourBookingForm.setFieldValue("tourId", tourDetails?.id);
+        tourBookingForm.setFieldValue("pricePerPerson",pricePerPerson);
+        tourBookingForm.setFieldValue("numberOfPeople",travellers);
+        tourBookingForm.setFieldValue("totalPrice",pricePerPerson*travellers);
+        tourBookingForm.setFieldValue("tourDate",tourDate);
+        setOpenBookingModal(true);
+    }
+
+  
+
+ 
+    // Fetch tour details using the tourId from the location state
+    // This is a placeholder, you should replace it with your actual data fetching logic
+    // For example, you might use useEffect to fetch the data when the component mounts
+   
 
 
 
@@ -485,7 +515,7 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
                         <InputNumber 
                             onChange={(value : number | null) => {
                                 setTravellers(value??0);
-                                const pp = tourDetails.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
+                                const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
                                 setPricePerPerson(pp as number);
                                 tourBookingForm.setFieldValue("pricePerPerson",pp);
                                 tourBookingForm.setFieldValue("totalPrice", (value??0) *pp)
@@ -599,13 +629,14 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return(
         <div
         >
+            <NormalizeTrailingSlash />
             {notificationContextHolder}
             
             <div
                 style={
                       { 
                         height:isMobile ? "200px":"300px", 
-                        background:`url(${tourDetails.bannerImageUrl})`,
+                        background:`url(${tourDetails?.bannerImageUrl})`,
                         backgroundSize: "cover", 
                         backgroundPosition: "center",
                         // imageRendering: "auto",
@@ -663,7 +694,7 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
                                         backgroundColor:"white"
                                     }}
                             >
-                                <p><span style={{fontSize:"25px"}}><b>{pricePerPerson}</b></span> pp ({tourDetails.tourPrice[0].currency.code})</p>
+                                <p><span style={{fontSize:"25px"}}><b>{pricePerPerson}</b></span> pp ({tourDetails?.tourPrice[0].currency.code})</p>
                                 
 
                                 <DatePicker 
@@ -681,7 +712,7 @@ const disabledDate: RangePickerProps['disabledDate'] = (current) => {
                                     value={travellers}
                                     onChange={(value) => {
                                         setTravellers(value as number);
-                                        const pp = tourDetails.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
+                                        const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
                                         setPricePerPerson(pp as number);
 
                                     }}
