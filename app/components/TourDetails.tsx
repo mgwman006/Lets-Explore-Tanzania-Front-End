@@ -146,16 +146,6 @@ export default function TourDetails()
         setOpenBookingModal(true);
     }
 
-  
-
- 
-    // Fetch tour details using the tourId from the location state
-    // This is a placeholder, you should replace it with your actual data fetching logic
-    // For example, you might use useEffect to fetch the data when the component mounts
-   
-
-
-
 
     const tabItems: TabsProps['items'] = [
         {
@@ -211,7 +201,7 @@ export default function TourDetails()
                                     {
                                         key:"1",
                                         label: 'On Arival',
-                                        children: <p>{tourGuide?.pickUpInformation.details}</p>
+                                        children: <p>{tourGuide?.pickUpInformation?.details ?? ""}</p>
                                     },
                                     {
                                         key:"2",
@@ -266,7 +256,7 @@ export default function TourDetails()
                                     {
                                         key:"3",
                                         label:"End of Tour",
-                                        children: <p>{tourGuide?.endOfTourInformation.details}</p>
+                                        children: <p>{tourGuide?.endOfTourInformation?.details ?? ""}</p>
                                     }
                                 ]
                             } 
