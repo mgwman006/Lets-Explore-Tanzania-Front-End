@@ -48,8 +48,6 @@ export default function TourDetails()
 
      useEffect(() => {
         
-        
-        // Fetch tour guide details if needed
         if(tourId)
         {
             getPrivateTourDetails(Number(tourId))
@@ -66,6 +64,9 @@ export default function TourDetails()
                             setPricePerPerson(lastPrice.pricePerPerson);
                             setTravellers(lastPrice.quantity);
                             setMinimumPricePerPerson(lastPrice.pricePerPerson);
+                        }
+                        else{
+                            openNotificationWithIcon('info', "No price set for this tour");
                         }
                         
                     }else
@@ -92,8 +93,9 @@ export default function TourDetails()
             .catch((error) => {
                 openNotificationWithIcon('error', error);
             });
-        }else{
 
+        }else{
+            openNotificationWithIcon('error', "Invalid tour Id "+tourId);
         }
            
 
@@ -120,17 +122,9 @@ export default function TourDetails()
                 
     }, []);
 
-    const range = (start: number, end: number) => {
-    const result = [];
-    for (let i = start; i < end; i++) {
-        result.push(i);
-    }
-    return result;
-    };
 
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-    // Can not select days before today and today
-    return current && current < dayjs().endOf('day');
+        return current && current < dayjs().endOf('day');
     };
     
     
@@ -197,87 +191,76 @@ export default function TourDetails()
             label: 'Activities',
             children: (
                        
-                        <Collapse 
-                            accordion 
-                            defaultActiveKey={'1'}
-                            items={
-                                [
-                                    {
-                                        key:"1",
-                                        label: 'On Arival',
-                                        children: tourGuide && tourGuide.pickUpInformation && tourGuide.pickUpInformation.details ? 
-                                        <p>{tourGuide?.pickUpInformation?.details ?? ""}</p> :
-                                        <p>No pickUpInformation yet</p>
-                                    },
-                                    {
-                                        key:"2",
-                                        label: "Day to Day Activities",
-                                        children: (
-                                            <Timeline
-                                                items={
-                                                    (tourGuide?.tourActivities || [])
-                                                    .map
-                                                    ((activity, index) => 
+                <Collapse 
+                    accordion 
+                    defaultActiveKey={'1'}
+                    items={
+                        [
+                            {
+                                key:"1",
+                                label: 'On Arival',
+                                children:<p>{tourGuide?.pickUpInformation?.details ?? "No pickUpInformation yet"}</p>
+                            },
+                            {
+                                key:"2",
+                                label: "Day to Day Activities",
+                                children: (
+                                    <Timeline
+                                        items={
+                                            (tourGuide?.tourActivities || [])
+                                            .map
+                                            ((activity, index) => 
+                                                    (
+                                                        {
+                                                            children: 
                                                             (
-                                                                {
-                                                                    children: 
-                                                                    (
-                                                                        <div>
-                                                                            <h3>Day {activity.dayNumber}: {activity.title}</h3>
-                                                                            <p><EnvironmentTwoTone /> {activity.location}</p>
-                                                                            <p> {activity.description}</p>
-                                                                            
-                                                                            <List
-                                                                                itemLayout="horizontal"
-                                                                                dataSource={activity.photos}
-                                                                                renderItem={
-                                                                                    (item) =>{
-                                                                                        return <Image 
-                                                                                            src={item} 
-                                                                                            height={60} 
-                                                                                            width={80}
-                                                                                            style={
-                                                                                                {
-                                                                                                    objectFit: "cover",
-                                                                                                }
-                                                                                            }
-                                                                                        />;
+                                                                <div>
+                                                                    <h3>Day {activity.dayNumber}: {activity.title}</h3>
+                                                                    <p><EnvironmentTwoTone /> {activity.location}</p>
+                                                                    <p> {activity.description}</p>
+                                                                    
+                                                                    <List
+                                                                        itemLayout="horizontal"
+                                                                        dataSource={activity.photos}
+                                                                        renderItem={
+                                                                            (item) =>{
+                                                                                return <Image 
+                                                                                    src={item} 
+                                                                                    height={60} 
+                                                                                    width={80}
+                                                                                    style={
+                                                                                        {
+                                                                                            objectFit: "cover",
+                                                                                        }
                                                                                     }
-                                                                                }
-                                                                            />
+                                                                                />;
+                                                                            }
+                                                                        }
+                                                                    />
 
-                                                                        </div>
-                                                            
-                                                                    ),
-                                                                }
-                                                            )
-                                                    )
-                                                
+                                                                </div>
                                                     
-                                                }
-                                            
-                                            />
-                                        )
-                                    },
-                                    {
-                                        key:"3",
-                                        label:"End of Tour",
-                                        children: 
-                                            
-                                                tourGuide && tourGuide.endOfTourInformation && tourGuide.endOfTourInformation.details
-                                                ? 
-                                                (<p>{tourGuide.endOfTourInformation.details}</p> )
-                                                :
-                                                (<p>No End Of Info yet</p>)
-                                            
+                                                            ),
+                                                        }
+                                                    )
+                                            )
                                         
-                                    }
-                                ]
-                            } 
-                            
-                        />
-                        
-                
+                                            
+                                        }
+                                    
+                                    />
+                                )
+                            },
+                            {
+                                key:"3",
+                                label:"End of Tour",
+                                children: <p>{tourGuide?.endOfTourInformation?.details ?? "No End Of Info yet"}</p> 
+                                        
+                            }
+                        ]
+                    } 
+                    
+                />
                     
             ),
         }
@@ -641,22 +624,23 @@ export default function TourDetails()
             
             <div
                 style={
-                      { 
-                        height:isMobile ? "200px":"300px", 
-                        background:`url(${tourDetails?.bannerImageUrl})`,
-                        backgroundSize: "cover", 
-                        backgroundPosition: "center",
-                        // imageRendering: "auto",
-                        backgroundRepeat: "no-repeat" ,
-                        
-                        objectFit: "cover",
-                        display:"flex",
-                        justifyContent:"end",
-                        flexDirection:"column",
-                        textAlign:"center"                        
-                        
+                    { 
+                    height:isMobile ? "200px":"300px", 
+                    background:`url(${tourDetails?.bannerImageUrl})`,
+                    backgroundSize: "cover", 
+                    backgroundPosition: "center",
+                    // imageRendering: "auto",
+                    backgroundRepeat: "no-repeat" ,
+                    
+                    objectFit: "cover",
+                    display:"flex",
+                    justifyContent:"end",
+                    flexDirection:"column",
+                    textAlign:"center"                        
+                    
 
-                      }}
+                    }
+                }
             >
                 <h1 style={{color:"white"}}>sample</h1>
                 
@@ -737,7 +721,9 @@ export default function TourDetails()
                                     id="book-now-button" 
                                     size="large" 
                                     type="primary" 
-                                    onClick={handleOpenTourBookingModal}>
+                                    onClick={handleOpenTourBookingModal}
+                                    disabled={!(tourDetails && tourDetails.tourPrice.length>0)}
+                                >
                                         Book Now
                                 </Button>
                             </Flex>
@@ -757,6 +743,7 @@ export default function TourDetails()
                                         block 
                                         size="large"
                                         onClick={handleOpenTourBookingModal}
+                                        disabled={!(tourDetails && tourDetails.tourPrice.length>0)}
                                     >
                                         Book Now
                                     </Button>
