@@ -37,7 +37,7 @@ export default function ToursList() {
             if (apiResponse && apiResponse.message)
             {
                 setTours(apiResponse.data);
-                setFilteredTours(apiResponse.data)
+                setFilteredTours(filteredTours.length>0 ? filteredTours : apiResponse.data)
 
             }
             else if (apiResponse) 
@@ -53,8 +53,14 @@ export default function ToursList() {
   }
 
   const handleDestinationFilter = (value: string) => {
-      const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
-      setFilteredTours(filteredTours);
+      if(value.toLocaleLowerCase() == "all")
+      {
+        setFilteredTours(tours);
+      }else{
+        const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
+        setFilteredTours(filteredTours);
+      }
+      
     };
 
   const handleViewSafari = (value : PrivateTourListItemDto) => {
@@ -107,7 +113,7 @@ export default function ToursList() {
               size="large"
               placeholder="Where To"
               onChange={(value) => handleDestinationFilter(value)}
-              options={destinations.map(dest => ({ value: dest, label: dest }))}
+              options={[{value:"All", label:"All"}, ...destinations.map(dest => ({ value: dest, label: dest }))]}
             />
         }
         style={{ backgroundColor: '', padding: '10px' }}
