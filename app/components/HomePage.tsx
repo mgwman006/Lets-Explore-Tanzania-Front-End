@@ -59,8 +59,14 @@ export default function HomePage(){
     };
     
     const handleDestinationFilter = (value: string) => {
-      const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
-      setFilteredTours(filteredTours);
+      if(value.toLocaleLowerCase() == "all")
+      {
+        setFilteredTours(tours);
+      }else{
+        const filteredTours: PrivateTourListItemDto[] = tours.filter(tour => tour.destinations.includes(value));
+        setFilteredTours(filteredTours);
+      }
+      
     };
 
     useEffect(
@@ -228,11 +234,12 @@ export default function HomePage(){
                   gap={"small"}
                 >
                 <Select
+                    defaultValue={"All"}
                     prefix={<EnvironmentOutlined />}
                     size="large"
                     placeholder="Where To"
                     onChange={(value) => handleDestinationFilter(value)}
-                    options={destinations.map(dest => ({ value: dest, label: dest }))}
+                    options={[{value:"All", label:"All"}, ...destinations.map(dest => ({ value: dest, label: dest }))]}
                     
                   />
                   <Button 
