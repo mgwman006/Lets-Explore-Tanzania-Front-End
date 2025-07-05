@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isMobile } from "react-device-detect";
 import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
-import { getDestinations, getPrivateTours } from "../services/admin/privateTourService";
+import { getDestinations, getLivePrivateTours } from "../services/admin/privateTourService";
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -31,7 +31,7 @@ export default function ToursList() {
 
   const getLatestTourData = () =>
   {
-    getPrivateTours().then(
+    getLivePrivateTours().then(
         (apiResponse) =>
         {
             if (apiResponse && apiResponse.message)

@@ -27,10 +27,10 @@ export const addBannerImage = async (tourId: number,image: FormData) => {
     }
 };
 
-export const getPrivateTours = async () => {
+export const getLivePrivateTours = async () => {
 
     try {
-        const response = await api.get<ApiResponse<PrivateTourListItemDto[]>>('/tour/private');
+        const response = await api.get<ApiResponse<PrivateTourListItemDto[]>>('/tour/private/live');
         return response.data;
     } catch (error) {
         const data : ApiResponse<PrivateTourListItemDto[]> = {
@@ -114,6 +114,7 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
             overView:"",
             durationDays:0,
             bannerImageUrl:"",
+            isLive:false,
             destinations:[],
             tourPrice:[],
             photo:[]
@@ -141,6 +142,7 @@ export const getPrivateTourDetails = async (tourId: number) => {
             overView:"",
             durationDays:0,
             bannerImageUrl:"",
+            isLive:false,
             destinations:[],
             tourPrice:[],
             photo:[]
@@ -325,6 +327,7 @@ export const updatePrivateTour = async (tourId:number,updateData: UpdateTourDeta
         overView: "",
         durationDays: 0,
         bannerImageUrl: "",
+        isLive:false,
         destinations: [],
         tourPrice: [],
         photo: []
