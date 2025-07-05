@@ -68,7 +68,7 @@ export default function TourDetails()
                         else{
                             openNotificationWithIcon('info', "No price set for this tour");
                         }
-                        
+
                     }else
                     {
                         openNotificationWithIcon('error', apiResponse.message);
@@ -625,25 +625,20 @@ export default function TourDetails()
             <div
                 style={
                     { 
-                    height:isMobile ? "200px":"300px", 
-                    background:`url(${tourDetails?.bannerImageUrl})`,
-                    backgroundSize: "cover", 
-                    backgroundPosition: "center",
-                    // imageRendering: "auto",
-                    backgroundRepeat: "no-repeat" ,
-                    
-                    objectFit: "cover",
-                    display:"flex",
-                    justifyContent:"end",
-                    flexDirection:"column",
-                    textAlign:"center"                        
-                    
+                        height:isMobile ? "200px":"300px", 
+                        width:"100%",
+                        backgroundImage:`url("${tourDetails?.bannerImageUrl}")`,
+                        backgroundRepeat:"no-repeat",
+                        backgroundSize:"cover",
+                        display:"flex",
+                        justifyContent:"end",
+                        flexDirection:"column",
+                        textAlign:"center"                        
 
                     }
                 }
             >
-                <h1 style={{color:"white"}}>sample</h1>
-                
+                <h1 style={{color:"black"}}>{tourDetails?.title}</h1>    
             </div>
             <Row
                 style={{backgroundColor:""}}

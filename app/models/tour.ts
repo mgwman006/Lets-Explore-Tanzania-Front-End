@@ -6,6 +6,7 @@ interface PrivateTourListItemDto
     overView:string,
     durationDays:number,
     bannerImageUrl:string,
+    isLive: false,
     destinations:string[],
     tourPrice: TourPriceDTO[],
 }
@@ -36,6 +37,7 @@ interface PrivateTourDetailsDto
     overView:string,
     durationDays:number,
     bannerImageUrl:string,
+    isLive:boolean,
     destinations:string[],
     tourPrice: TourPriceDTO[],
     photo:string[]
