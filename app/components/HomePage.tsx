@@ -2,7 +2,7 @@ import { Col, Flex, Progress, Row, Steps, Typography, Image, Button, Carousel, S
 import { EnvironmentOutlined, FileAddOutlined, HeatMapOutlined, LoadingOutlined, NodeExpandOutlined, RightOutlined } from "@ant-design/icons";
 import { isMobile } from "react-device-detect";
 import { useEffect, useState } from "react";
-import { getDestinations, getPrivateTours } from "../services/admin/privateTourService";
+import { getDestinations, getLivePrivateTours } from "../services/admin/privateTourService";
 import { useNavigate } from "react-router-dom";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
@@ -23,7 +23,7 @@ export default function HomePage(){
 
     const getLatestTourData = () =>
     {
-        getPrivateTours().then(
+        getLivePrivateTours().then(
             (apiResponse) =>
             {
                 if (apiResponse && apiResponse.message)
