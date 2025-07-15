@@ -22,7 +22,7 @@ const items = [
   },
   {
     key: '4',
-    label: <Link to="/" >Zanzibar</Link>,
+    label: <Link to="zanzibar" >Zanzibar</Link>,
   }
   ,
   {
