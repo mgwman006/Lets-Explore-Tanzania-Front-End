@@ -3,6 +3,7 @@ import Home from "./components/Home";
 import HomePage from "./components/HomePage";
 import TourDetails from "./components/TourDetails";
 import ToursList from "./components/ToursList";
+import Zanzibarpage from "./components/Zanzibarpage";
 
 const routes = [
   {
@@ -12,6 +13,10 @@ const routes = [
       {
         path:"",
         Component: HomePage
+      },
+      {
+        path:"zanzibar",
+        Component: Zanzibarpage
       },
       {
         path:"tours",
@@ -29,6 +34,7 @@ const routes = [
       }
     ]
   }
+ 
 ];
 
 export default routes;
