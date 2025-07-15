@@ -1,4 +1,4 @@
-import path from "path";
+
 import Home from "./components/Home";
 import HomePage from "./components/HomePage";
 import Projects from "./components/Projects";
@@ -8,6 +8,7 @@ import AdminTours from "./components/admin/AdminTours";
 import AdminWelcomePage from "./components/admin/AdminWelcomePage";
 import TourDashboard from "./components/admin/TourDashboard";
 import TourDetails from "./components/admin/TourDetails";
+import Zanzibarpage from "./components/Zanzibarpage";
 
 const routes = [
   {
@@ -21,6 +22,10 @@ const routes = [
       {
         path:"projects",
         Component: Projects
+      },
+      {
+        path:"zanzibar",
+        Component: Zanzibarpage
       }
     ]
   },
