@@ -1,13 +1,8 @@
-
+import ToursPage from "./components/ToursPage";
 import Home from "./components/Home";
 import HomePage from "./components/HomePage";
-import Projects from "./components/Projects";
-import AddTour from "./components/admin/AddTour";
-import AdminHome from "./components/admin/AdminHome";
-import AdminTours from "./components/admin/AdminTours";
-import AdminWelcomePage from "./components/admin/AdminWelcomePage";
-import TourDashboard from "./components/admin/TourDashboard";
-import TourDetails from "./components/admin/TourDetails";
+import TourDetails from "./components/TourDetails";
+import ToursList from "./components/ToursList";
 import Zanzibarpage from "./components/Zanzibarpage";
 
 const routes = [
@@ -39,24 +34,18 @@ const routes = [
       },
       {
         path:"tours",
-        Component: TourDashboard,
+        Component: ToursPage,
         children:[
           {
             path:"",
-            Component:AdminTours,
-
+            Component: ToursList,
           },
           {
-            path:"addtour",
-            Component:AddTour
-          },
-          {
-             path:"tourdetails",
-             Component:TourDetails
+            path:":tourId",
+            Component:TourDetails
           }
         ]
       }
-      
     ]
   }
 ];
