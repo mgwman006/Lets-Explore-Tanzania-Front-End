@@ -13,25 +13,8 @@ const items = [
     label: <Link to="/" >Home</Link>,
   },
   {
-    key: '2',
-    label: <Link to="" >Tours</Link>,
-  },
-  {
-    key: '3',
-    label: <Link to="/" >Products</Link>,
-  },
-  {
     key: '4',
     label: <Link to="zanzibar" >Zanzibar</Link>,
-  }
-  ,
-  {
-    key: '5',
-    label: <Link to="/" >Kilimanjaro</Link>,
-  },
-  {
-    key: '6',
-    label: <Link to="/" >Serengeti</Link>,
   }
 
 ];
