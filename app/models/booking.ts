@@ -9,7 +9,8 @@ export  interface BookingCreateDto
     numberOfPeople:number;
     totalPrice:number;
     tourDate:Dayjs;
-    specialRequests:string
+    specialRequests:string;
+    operatorId: number
 }
 
 export  interface CreatedBookingDto

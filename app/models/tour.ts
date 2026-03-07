@@ -40,7 +40,8 @@ interface PrivateTourDetailsDto
     isLive:boolean,
     destinations:string[],
     tourPrice: TourPriceDTO[],
-    photo:string[]
+    photo:string[],
+    operatorId: number
 }
 
 interface TourDate{
