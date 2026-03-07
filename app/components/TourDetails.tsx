@@ -319,7 +319,7 @@ export default function TourDetails()
     const handleSubmitBooking = (values: BookingCreateDto) => {
         setConfirmLoading(true);
         setTimeout(() => {
-
+            console.log(JSON.stringify(values));
             addBooking(values).then(
             (apiResponse) =>
             {

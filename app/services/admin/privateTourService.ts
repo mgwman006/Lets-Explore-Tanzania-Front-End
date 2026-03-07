@@ -364,6 +364,8 @@ export const deleteTourPrice = async (tourId:number, tourPriceId: number) => {
 export const addBooking = async (booking : BookingCreateDto) => {
 
     try {
+        console.log("Data to be sent this is in service");
+        console.log(JSON.stringify(booking));
         const response = await api.post<ApiResponse<CreatedBookingDto>>(`tour/booking`, booking);
         return response.data;
     } catch (error) {
