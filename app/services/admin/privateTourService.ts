@@ -117,7 +117,8 @@ export const addPhotos = async (tourId: number,photos: FormData) => {
             isLive:false,
             destinations:[],
             tourPrice:[],
-            photo:[]
+            photo:[],
+            operatorId:0
         },
         statusCode: 0
       }
@@ -145,7 +146,8 @@ export const getPrivateTourDetails = async (tourId: number) => {
             isLive:false,
             destinations:[],
             tourPrice:[],
-            photo:[]
+            photo:[],
+            operatorId:0
         },
         statusCode: 0
       }
@@ -330,7 +332,8 @@ export const updatePrivateTour = async (tourId:number,updateData: UpdateTourDeta
         isLive:false,
         destinations: [],
         tourPrice: [],
-        photo: []
+        photo: [],
+        operatorId:0
       },
       statusCode: 0
     }

@@ -141,6 +141,7 @@ export default function TourDetails()
         tourBookingForm.setFieldValue("numberOfPeople",travellers);
         tourBookingForm.setFieldValue("totalPrice",pricePerPerson*travellers);
         tourBookingForm.setFieldValue("tourDate",tourDate);
+        tourBookingForm.setFieldValue("operatorId",tourDetails?.operatorId);
         setOpenBookingModal(true);
     }
 
@@ -459,6 +460,12 @@ export default function TourDetails()
                     form={tourBookingForm}
                     onFinish={verifyTourist}
                 >
+                    <Form.Item 
+                        label="Operator Id"
+                        name="operatorId"
+                    >
+                        <InputNumber disabled style={{ width:"100%"}}/>
+                    </Form.Item>
                     <Form.Item 
                         label="TourId"
                         name="tourId"
