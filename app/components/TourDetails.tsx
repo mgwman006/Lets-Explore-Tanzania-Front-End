@@ -286,6 +286,8 @@ export default function TourDetails()
                     if(apiResponse.data == TouristStatus.EXIST)
                     {
                         //add booking
+                        console.log(JSON.stringify(values));
+                        console.log(JSON.stringify(bokingFormValues));
                         handleSubmitBooking(values);
                        
                     }
