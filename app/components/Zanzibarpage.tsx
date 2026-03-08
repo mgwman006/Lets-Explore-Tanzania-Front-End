@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Carousel } from 'antd';
 import { Col, Row } from 'antd';
 import { Card,Flex, Splitter, Typography } from 'antd';
-import ReactPlayer from 'react-player';
 import { isMobile } from 'react-device-detect';
+import ReactPlayer from "react-player";
 // import { data } from 'react-router-dom'; // Removed because it's not used and causes conflict
 
 export default function ZanzibarPage() {
@@ -25,7 +25,7 @@ const contentStyle: React.CSSProperties = {
     <React.Fragment>
       <div>
         <div className="player-Wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
-          <video controls style={videoStyle} className="video-player" autoPlay loop muted>
+          <video  style={videoStyle} className="video-player" autoPlay loop muted>
             <source src="zanzibar11.mp4" type="video/mp4" />
           </video>
         </div>

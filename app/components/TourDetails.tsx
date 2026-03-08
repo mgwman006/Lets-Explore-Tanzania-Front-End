@@ -1,17 +1,13 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline, Drawer, Steps, Result, GetProps, Collapse } from 'antd';
-import Meta from "antd/es/card/Meta";
+import { Breadcrumb, Button, Card, Col, Image, List, Row, Statistic, Tabs, TabsProps, Typography, Table, Flex, Modal, Form, notification, Input, InputNumber, Select, Upload, UploadProps, Alert, Popconfirm, DatePicker, Tag, UploadFile, Space, Timeline, Drawer, Steps, Result, GetProps, Collapse, Calendar } from 'antd';
 import { CalendarFilled, CalendarOutlined, CalendarTwoTone, ClockCircleFilled, ClockCircleTwoTone, DeleteColumnOutlined, DeleteOutlined, DeleteRowOutlined, EnterOutlined, EnvironmentFilled, EnvironmentOutlined, EnvironmentTwoTone, ExclamationCircleOutlined, FieldTimeOutlined, LikeOutlined, LoadingOutlined, MoneyCollectTwoTone, PlusOutlined, RightOutlined, SmileOutlined, SolutionOutlined, UploadOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { addBooking, getPrivateTourDetails, getTourGuideDetails, sendOtp, updatePrivateTour, verifyEmail, verifyOtp } from "../services/admin/privateTourService";
 import { isMobile } from "react-device-detect";
 import TextArea from "antd/es/input/TextArea";
 import { Dayjs } from "dayjs";
-import { BookingCreateDto, CreatedBookingDto } from "../models/booking";
-import { TouristStatus } from "../models/tourist";
-import { OtpVerificationRequestDTO } from "../models/auth";
+import { BookingCreateDto } from "../models/booking";
 import dayjs from 'dayjs';
-import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
 import { useParams } from "react-router-dom";
 
 
@@ -27,22 +23,13 @@ export default function TourDetails()
     const { tourId } = useParams();
     const [tourDetails, setTourDeatails] = useState<PrivateTourDetailsDto>();
     const [tourGuide, setTourGuide] = useState<TourGuideDTO>();
-    const [confirmLoading, setConfirmLoading] = useState(false);
     const [apiNotification, notificationContextHolder] = notification.useNotification();
     const [travellers, setTravellers] = useState<number>(0);
     const [pricePerPerson, setPricePerPerson] = useState<number>(0);
     const [miniMumPricePerPerson, setMinimumPricePerPerson] = useState<number>(0);
     const [showBookNowButton, setShowBookButton] = useState<boolean>(true);
-    const [tourBookingForm] = Form.useForm<BookingCreateDto>();
-    const [openBookingModal, setOpenBookingModal] = useState(false);
-    const [tourDate, setTourDate] = useState<Dayjs>();
-    const [stepCurrent,setStepCurrent] = useState<number>(0);
+    const [tourDate, setTourDate] = useState<Dayjs>(dayjs());
     const navigate = useNavigate();
-    const [createdBooking, setCreatedBooking] = useState<CreatedBookingDto>();
-    const [otpVerificationForm] = Form.useForm<OtpVerificationRequestDTO>();
-    const [bokingFormValues, setBookingFormValues] = useState<BookingCreateDto>();
-    const [otpVerificationFormValues, setOtpVerificationFormValues] = useState<OtpVerificationRequestDTO>();
-    const [resendOtpLoading, setResendOtpLoading] = useState<boolean>(false);
 
 
 
@@ -94,7 +81,8 @@ export default function TourDetails()
                 openNotificationWithIcon('error', error);
             });
 
-        }else{
+        }
+        else{
             openNotificationWithIcon('error', "Invalid tour Id "+tourId);
         }
            
@@ -136,13 +124,23 @@ export default function TourDetails()
 
     const handleOpenTourBookingModal = () =>
     {
-        tourBookingForm.setFieldValue("tourId", tourDetails?.id);
-        tourBookingForm.setFieldValue("pricePerPerson",pricePerPerson);
-        tourBookingForm.setFieldValue("numberOfPeople",travellers);
-        tourBookingForm.setFieldValue("totalPrice",pricePerPerson*travellers);
-        tourBookingForm.setFieldValue("tourDate",tourDate);
-        tourBookingForm.setFieldValue("operatorId",tourDetails?.operatorId);
-        setOpenBookingModal(true);
+        const bookingDataTemp : BookingCreateDto =
+        {
+            tourId:tourDetails?.id??0,
+            customerName:"",
+            email:"",
+            phoneNumber:"",
+            pricePerPerson:pricePerPerson,
+            numberOfPeople:travellers,
+            totalPrice:pricePerPerson*travellers,
+            tourDate:tourDate,
+            specialRequests:"",
+            operatorId: tourDetails?.operatorId ?? 0
+
+        };
+        localStorage.setItem("bookingData",JSON.stringify(bookingDataTemp));
+        localStorage.setItem("tourDetails",JSON.stringify(tourDetails));
+        navigate('/tours/booking')
     }
 
 
@@ -268,391 +266,25 @@ export default function TourDetails()
     ];
 
 
-
-    const verifyTourist = (values:BookingCreateDto) =>
-    {
-        setBookingFormValues(values);
-        setConfirmLoading(true);
-        const requestDto = {
-            email:values.email
-        };
-
-        verifyEmail(requestDto)
-        .then(
-            (apiResponse) =>
-            {
-                if(apiResponse.success)
-                {
-                    if(apiResponse.data == TouristStatus.EXIST)
-                    {
-                        //add booking
-                        console.log(JSON.stringify(values));
-                        console.log(JSON.stringify(bokingFormValues));
-                        handleSubmitBooking(values);
-                       
-                    }
-                    else if ( apiResponse.data == TouristStatus.NONEXISTENT)
-                    {
-                        //SEND OTP
-                        requestOtp(values.email);
-                    }
-                    else{
-                        //error
-                        openNotificationWithIcon('error',"unknown error");
-                    }
-                }
-                else{
-                    openNotificationWithIcon('error',apiResponse.message);
-                }
-                
-            }
-        ).catch( 
-            (error) =>
-            {
-                openNotificationWithIcon('error',error);
-                setConfirmLoading(false);
-            }
-        );
-    }
-
-
-    const handleSubmitBooking = (values: BookingCreateDto) => {
-        setConfirmLoading(true);
-        setTimeout(() => {
-
-            addBooking(values).then(
-            (apiResponse) =>
-            {
-                if(apiResponse.success)
-                {
-                    setCreatedBooking(apiResponse.data);
-                    openNotificationWithIcon('success',"booking created");
-                    setStepCurrent(2);
-                }else
-                {
-                    openNotificationWithIcon('error',apiResponse.message);
-                }
-                setConfirmLoading(false);
-                
-            }
-        ).catch(
-            (error) =>
-            {
-                openNotificationWithIcon('error',error);
-                setConfirmLoading(false);
-            }
-        );
-
-        },1000);
-       
-        
-        
-        
-    }
-
-    const sendOtpVerification = (values: OtpVerificationRequestDTO) => {
-        setOtpVerificationFormValues(values);
-        setConfirmLoading(true);
-        verifyOtp(values)
-        .then(
-            (apiResponse) =>
-            {
-                if(apiResponse.success)
-                {
-                    if(bokingFormValues)
-                    {
-                        handleSubmitBooking(bokingFormValues);
-                         setConfirmLoading(false);
-                    }
-                    else{
-                        openNotificationWithIcon('error', "For some reasons booking data is null");
-                         setConfirmLoading(false);
-                        return;
-                    }
-                        
-                    openNotificationWithIcon('success',"verified");
-                }
-                else{
-                    openNotificationWithIcon('error',apiResponse.message);
-                    setConfirmLoading(false);
-                }
-            }
-        )
-        .catch(
-            (error) =>
-            {
-                setConfirmLoading(false);
-                openNotificationWithIcon('error','unknown error '+error);
-            }
-        )
-    }
-
-    const requestOtp = (emailValue : string) => {
-        setConfirmLoading(true);
-        sendOtp(
-            {
-                email: emailValue
-            }
-        )
-        .then(
-            (apiResponse) =>
-            {
-                if(apiResponse.success)
-                {
-                    openNotificationWithIcon('success',"otp send");
-                    setStepCurrent(1);
-                    
-                }
-                else{
-                    openNotificationWithIcon('error',apiResponse.message);
-                }
-                setConfirmLoading(false);
-            }
-        )
-        .catch(
-            (error) =>
-            {
-                openNotificationWithIcon('error','unknown error '+error);
-                setConfirmLoading(false);
-            }
-        )
-    }
-
-    const resendOtp = (emailValue : string) => {
-        setResendOtpLoading(true);
-        sendOtp(
-            {
-                email: emailValue
-            }
-        )
-        .then(
-            (apiResponse) =>
-            {
-                if(apiResponse.success)
-                {
-                    openNotificationWithIcon('success',"otp send");
-                    setStepCurrent(1);
-                    
-                }
-                else{
-                    openNotificationWithIcon('error',apiResponse.message);
-                }
-                setResendOtpLoading(false);
-                
-            }
-        )
-        .catch(
-            (error) =>
-            {
-                setResendOtpLoading(false);
-                openNotificationWithIcon('error','unknown error '+error);
-            }
-        )
-    }
-
-    const stepsItems = [
-        {
-                        
-            title: 'Booking Details',
-            icon: <UserOutlined />,
-            content: 
-            (
-                <Form<BookingCreateDto>
-                    layout={"vertical"}
-                    form={tourBookingForm}
-                    onFinish={verifyTourist}
-                >
-                    <Form.Item 
-                        label="Operator Id"
-                        name="operatorId"
-                    >
-                        <InputNumber disabled style={{ width:"100%"}}/>
-                    </Form.Item>
-                    <Form.Item 
-                        label="TourId"
-                        name="tourId"
-                    >
-                        <InputNumber disabled style={{ width:"100%"}}/>
-                    </Form.Item>
-                    <Form.Item 
-                        label="Name"
-                        name="customerName"
-                        rules={[{required:true, message:"user name is required"}]}
-                    >
-                        <Input type="text" />
-                    </Form.Item>
-                    <Form.Item 
-                        label="Email"
-                        name="email"
-                        rules={[{required:true, message:"email is required"}]}
-                    >
-                        <Input type="email" />
-                    </Form.Item>
-                    <Form.Item 
-                        label="Phone Number"
-                        name="phoneNumber"
-                        rules={[{required:true, message:"phoneNumber is required"}]}
-                    >
-                        <Input type="text" />
-                    </Form.Item>
-                    <Form.Item 
-                        label="Price PerPerson"
-                        name="pricePerPerson"
-                        rules={[{required:true, message:"price is required"}]}
-                    >
-                        <InputNumber disabled style={{ width:"100%"}} />
-                    </Form.Item>
-                    <Form.Item 
-                        label="NumberOfPeople"
-                        name="numberOfPeople"
-                        rules={[{required:true, message:"number of people is required"}]}
-                    >
-                        <InputNumber 
-                            onChange={(value : number | null) => {
-                                setTravellers(value??0);
-                                if(tourDetails && tourDetails?.tourPrice?.length>0)
-                                {
-                                    const pp = tourDetails?.tourPrice.find(x => x.quantity==value)?.pricePerPerson??miniMumPricePerPerson;
-                                    setPricePerPerson(pp as number);
-                                    tourBookingForm.setFieldValue("pricePerPerson",pp);
-                                    tourBookingForm.setFieldValue("totalPrice", (value??0) *pp)
-                                }
-                                
-                            }}
-                            style={{ width:"100%"}} 
-                        />
-                    </Form.Item>
-                    <Form.Item 
-                        label="Total Price"
-                        name="totalPrice"
-                        
-                    >
-                        <InputNumber style={{ width:"100%"}} disabled/>
-                    </Form.Item>
-
-                    <Form.Item 
-                        
-                        label="Tour Date"
-                        name="tourDate"
-                        rules={[{required:true, message:"date is required"}]}
-                    >
-                        <DatePicker 
-                            disabledDate={disabledDate}
-                            format="YYYY-MM-DD"
-                            style={{ width:"100%"}} 
-                        />
-                    </Form.Item>
-                    <Form.Item 
-                        label="Special Requests"
-                        name="specialRequests"
-                    >
-                        <TextArea 
-                            rows={4} 
-                            count={{
-                            show: true,
-                            max: 500,
-                            }}
-                        />
-                    </Form.Item>
-
-
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" loading={confirmLoading}>Submit</Button>
-                    </Form.Item>
-                </Form>
-            )
-        },
-        {
-            title: 'Verification',
-            icon: <SolutionOutlined />,
-            content:(
-                <Form<OtpVerificationRequestDTO>
-                    layout={'vertical'}
-                    form={otpVerificationForm}
-                    onFinish={sendOtpVerification}
-                >
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[{required:true, message:"Email Value is Required"}]}
-                    >
-                        <Input type="email" />
-                    </Form.Item>
-                    <Form.Item
-                        name="otp"
-                        label="Otp"
-                        rules={[{required:true, message:"Otp value is required"}]}
-                    >
-                        <Input type="text" />
-                    </Form.Item>
-                    <Form.Item
-                    >
-                        <Flex vertical={false} gap={'small'}>
-                            <Button 
-                                loading={resendOtpLoading} 
-                                variant="solid"
-                                color="green" 
-                                onClick={() => resendOtp(tourBookingForm.getFieldValue('email'))}
-                            >
-                                Request New Otp
-                            </Button>
-                            <Button 
-                                loading={confirmLoading} 
-                                type="primary" 
-                                htmlType="submit"
-                            >
-                                Submit Otp
-                            </Button>
-                        </Flex>
-                        
-                    </Form.Item>
-                </Form>
-            )
-        },
-        {
-            title: 'Done',
-            icon: <SmileOutlined />,
-            content: (
-                <Result
-                    status="success"
-                    title="Your Booking Successfully Received!"
-                    subTitle={`Your Booking reference number is : ${createdBooking?.referenceNumber}`}
-                    extra={[
-                    <Button type="primary" onClick={() => navigate("/")}>Ok Done <RightOutlined /></Button>,
-                    ]}
-                />
-            )
-        },
-    ];
-
     return(
         <div
         >
-            <NormalizeTrailingSlash />
             {notificationContextHolder}
-            
-            <div
-                style={
-                    { 
-                        height:isMobile ? "200px":"300px", 
-                        width:"100%",
-                        backgroundImage:`url("${tourDetails?.bannerImageUrl}")`,
-                        backgroundRepeat:"no-repeat",
-                        backgroundSize:"cover",
-                        display:"flex",
-                        justifyContent:"end",
-                        flexDirection:"column",
-                        textAlign:"center"                        
-
-                    }
-                }
-            >
-                <h1 style={{color:"black"}}>{tourDetails?.title}</h1>    
-            </div>
             <Row
-                style={{backgroundColor:""}}
+                justify={'center'}
+                align={'middle'}
             >
-                
+                <Col xs={24} sm={24} lg={24} xl={24} xxl={24}>
+                     <Image
+                        width={'100%'}
+                        alt="basic image"
+                        src={tourDetails?.bannerImageUrl}
+                        preview={false}
+                    />
+                </Col>
+                <Col xs={24} sm={24} lg={24} xl={24} xxl={24}>
+                    <Typography.Title level={3}>{tourDetails?.title}</Typography.Title>
+                </Col>
                 <Col xs={24} sm={15} lg={15} xl={15} xxl={15}>
                 
                     <Tabs 
@@ -669,7 +301,7 @@ export default function TourDetails()
                         defaultActiveKey="1" 
                         items={tabItems} 
                     />
-                    
+
                 </Col>
                 <Col 
                     xs={24} sm={9} lg={9} xl={9} xxl={9} 
@@ -760,42 +392,6 @@ export default function TourDetails()
                 </Col>
 
             </Row>
-           
-
-            <Modal
-                
-                centered
-                footer={null}
-                title={
-                    (
-                        <Steps
-                            size="small"
-                            current={stepCurrent}
-                            items={stepsItems}
-                        />
-                    )
-                }
-                open={openBookingModal}
-                confirmLoading={confirmLoading}
-                onCancel={() =>{
-                    setOpenBookingModal(false);
-                    setStepCurrent(0);
-
-                } }
-                width={{
-                    xs: '90%',
-                    sm: '80%',
-                    md: '70%',
-                    lg: '60%',
-                    xl: '50%',
-                    xxl: '40%',
-                    }}
-            >
-                
-
-                
-                <div>{stepsItems[stepCurrent].content}</div>
-            </Modal>
 
         </div>
     );

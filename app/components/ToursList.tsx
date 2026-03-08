@@ -5,7 +5,6 @@ import { EnvironmentOutlined, MoneyCollectFilled, MoneyCollectOutlined } from "@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isMobile } from "react-device-detect";
-import NormalizeTrailingSlash from "./NormalizeTrailingSlash";
 import { getDestinations, getLivePrivateTours } from "../services/admin/privateTourService";
 
 const { Title, Paragraph, Text, Link } = Typography;
@@ -99,7 +98,6 @@ export default function ToursList() {
   
   return (
     <div>
-      <NormalizeTrailingSlash />
       {notificationContextHolder}
       <h1>Filtered Tours</h1>
      
