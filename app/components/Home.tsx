@@ -78,7 +78,7 @@ export default function Home() {
                 </div>
 
                 <div style={{  alignContent:'center'}}>
-                  <Image preview={false}  src="logo1.jpg" width='100%'/> 
+                  <Image preview={false}  src="/logo1.jpg" width='100%'/> 
                 </div>
             
             </Flex>            
@@ -211,7 +211,8 @@ export default function Home() {
         </Row>
         <Row style={{ textAlign: 'center', marginTop: '20px', backgroundColor:"black" }}>
             <Col span={24}>
-              ©{new Date().getFullYear()} Built with love by <a href='https://www.tante.tz' target="_blank">tante.tz</a>
+              {/* ©{new Date().getFullYear()} Built with love by <a href='https://www.tante.tz' target="_blank">tante.tz</a> */}
+              ©{new Date().getFullYear()} Built with love by tante
             </Col>
         </Row>
             
