@@ -4,6 +4,8 @@ import HomePage from "./components/HomePage";
 import TourDetails from "./components/TourDetails";
 import ToursList from "./components/ToursList";
 import Zanzibarpage from "./components/Zanzibarpage";
+import { Component } from "react";
+import BookingPage from "./components/BookingPage";
 
 const routes = [
   {
@@ -29,6 +31,10 @@ const routes = [
           {
             path:":tourId",
             Component:TourDetails
+          },
+          {
+            path:"booking",
+            Component:BookingPage
           }
         ]
       }

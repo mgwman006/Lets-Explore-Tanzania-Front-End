@@ -2,7 +2,6 @@ import React from 'react';
 import { Carousel } from 'antd';
 import { Col, Row } from 'antd';
 import { Card,Flex, Splitter, Typography } from 'antd';
-import ReactPlayer from 'react-player';
 import { isMobile } from 'react-device-detect';
 // import { data } from 'react-router-dom'; // Removed because it's not used and causes conflict
 
