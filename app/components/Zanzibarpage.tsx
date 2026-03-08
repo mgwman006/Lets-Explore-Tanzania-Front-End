@@ -26,7 +26,7 @@ const contentStyle: React.CSSProperties = {
       <div>
         <div className="player-Wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
           <video  style={videoStyle} className="video-player" autoPlay loop muted>
-            <source src="zanzibar11.mp4" type="video/mp4" />
+            <source src="/zanzibar11.mp4" type="video/mp4" />
           </video>
         </div>
         <h1
@@ -58,7 +58,7 @@ const contentStyle: React.CSSProperties = {
           <Row>
 
             <Col xs={24} sm={8} md={8} lg={8} xl={8} xxl={8}>
-              <img src="culture.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
+              <img src="/culture.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
               <p className="text-lg text-gray-700" style={{ margin:0,textAlign: 'left' }}>
                 Zanzibar has a rich and complex history shaped by trade,colonization, and revolution.
                 Initially inhabited for over 20,000 years, it became a crucial trading hub for various groups,
@@ -67,7 +67,7 @@ const contentStyle: React.CSSProperties = {
             </Col>
 
             <Col xs={24} sm={8} md={8} lg={8} xl={8} xxl={8}>
-              <img src="jetski.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
+              <img src="/jetski.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
               <p className="text-lg text-gray-700">
                 The most popular outdoor adventure and fun of beach games is jetski,Kendwa beach is the best beach
                 for jet ski experience due to its reputation of being most beautiful white sand beach with crystal clear turquoise water
@@ -75,7 +75,7 @@ const contentStyle: React.CSSProperties = {
             </Col>
 
             <Col xs={24} sm={8} md={8} lg={8} xl={8} xxl={8}>
-              <img src="zanz01.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
+              <img src="/zanz01.jpg" alt="Zanzibar" style={{ width: '70%', height: '280px' }} />
               <p className="text-lg text-gray-700">
                 Zanzibar's cuisine is a vibrant mix of African, Arabic, Indian, and Portuguese influences,
                 creating a unique culinary experience. Popular dishes include seafood, biryani, pilau, and Zanzibar pizza,
@@ -142,7 +142,7 @@ const contentStyle: React.CSSProperties = {
             <Col xs={24} sm={8} md={8} lg={8} xl={8} xxl={8}>
               <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row-reverse', 
                 marginBottom: 24, background: '#f9fafb', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}>
-                <img src="culture1.jpg"
+                <img src="/culture1.jpg"
                   alt="Zanzibar Culture"
                   style={{ display: 'block', width: '40%', height: '15%', alignItems: 'left' }} />
               </div>
@@ -166,7 +166,7 @@ const contentStyle: React.CSSProperties = {
               marginBottom: 24, background: '#f9fafb', borderRadius: 12, boxShadow: '0 2px 8px #0001' }}>
               <img
                 alt="avatar"
-                src="jetski.jpg"
+                src="/jetski.jpg"
                 style={{ display: 'block', width: '50%', height:'50%' }}
               />
             </div>
@@ -191,7 +191,7 @@ const contentStyle: React.CSSProperties = {
   <Carousel autoplay autoplaySpeed={5000}>
     <div>
       <h3 style={contentStyle}>
-         <img src="beach.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
+         <img src="/beach.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
           <div style={{ padding: 16 }}>
           <strong>Nungwi Beach</strong>
           <p style={{ margin: 0, fontSize: 16 }}>
@@ -202,12 +202,12 @@ const contentStyle: React.CSSProperties = {
     </div>
     <div>
       <h3 style={contentStyle}>
-         <img src="beach3.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
+         <img src="/beach3.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
       </h3>
     </div>
     <div>
       <h3 style={contentStyle}>
-         <img src="sunset.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
+         <img src="/sunset.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 500, objectFit: 'cover' }} />
       </h3>
     </div>
   </Carousel>
@@ -225,7 +225,7 @@ const contentStyle: React.CSSProperties = {
 
     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '32px', marginBottom: '32px' }}>
       <div style={{ width: 320, background: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px #0001' }}>
-        <img src="Nungwi.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
+        <img src="/Nungwi.jpg" alt="Nungwi Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
         <div style={{ padding: 16 }}>
           <strong>Nungwi Beach</strong>
           <p style={{ margin: 0, fontSize: 16 }}>
@@ -234,7 +234,7 @@ const contentStyle: React.CSSProperties = {
         </div>
       </div>
       <div style={{ width: 320, background: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px #0001' }}>
-        <img src="kendwa.jpg" alt="Kendwa Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
+        <img src="/kendwa.jpg" alt="Kendwa Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
         <div style={{ padding: 16 }}>
           <strong>Kendwa Beach</strong>
           <p style={{ margin: 0, fontSize: 16 }}>
@@ -243,7 +243,7 @@ const contentStyle: React.CSSProperties = {
         </div>
       </div>
       <div style={{ width: 320, background: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px #0001' }}>
-        <img src="paje.jpg" alt="Paje Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
+        <img src="/paje.jpg" alt="Paje Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
         <div style={{ padding: 16 }}>
           <strong>Paje Beach</strong>
           <p style={{ margin: 0, fontSize: 16 }}>
@@ -252,7 +252,7 @@ const contentStyle: React.CSSProperties = {
         </div>
       </div>
       <div style={{ width: 320, background: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px #0001' }}>
-        <img src="Jambiani.jpg" alt="Jambiani Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
+        <img src="/Jambiani.jpg" alt="Jambiani Beach" style={{ width: '100%', height: 180, objectFit: 'cover' }} />
         <div style={{ padding: 16 }}>
           <strong>Jambiani Beach</strong>
           <p style={{ margin: 0, fontSize: 16 }}>
@@ -261,7 +261,7 @@ const contentStyle: React.CSSProperties = {
         </div>
       </div>
       <div style={{ width: 570, background: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px #0001' }}>
-        <img src="Matemwe.jpg" alt="Matemwe Beach" style={{ width: 570, height: 220, objectFit: 'cover' }} />
+        <img src="/Matemwe.jpg" alt="Matemwe Beach" style={{ width: 570, height: 220, objectFit: 'cover' }} />
         <div style={{ padding: 16 }}>
           <strong>Matemwe Beach</strong>
           <p style={{ margin: 0, fontSize: 16, alignContent:'right' }}>
