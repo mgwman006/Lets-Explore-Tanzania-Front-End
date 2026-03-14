@@ -209,7 +209,7 @@ export default function Home() {
 
           
         </Row>
-        <Row style={{ textAlign: 'center', marginTop: '20px', backgroundColor:"black" }}>
+        <Row style={{ textAlign: 'center', marginTop: '20px' }}>
             <Col span={24}>
               {/* ©{new Date().getFullYear()} Built with love by <a href='https://www.tante.tz' target="_blank">tante.tz</a> */}
               ©{new Date().getFullYear()} Built with love by tante

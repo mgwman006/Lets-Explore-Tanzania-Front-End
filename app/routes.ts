@@ -5,7 +5,8 @@ import TourDetails from "./components/TourDetails";
 import ToursList from "./components/ToursList";
 import Zanzibarpage from "./components/Zanzibarpage";
 import { Component } from "react";
-import BookingPage from "./components/BookingPage";
+import BookingPage from "./components/booking/BookingPage";
+import PayPal from "./components/PayPal";
 
 const routes = [
   {
@@ -37,6 +38,10 @@ const routes = [
             Component:BookingPage
           }
         ]
+      },
+      {
+        path:"pay",
+        Component: PayPal
       }
     ]
   }
