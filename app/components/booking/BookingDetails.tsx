@@ -67,7 +67,6 @@ export default function BookingDetails({ next }:BookingStepsProps)
     const handleSubmitBooking = (values: BookingDto) => {
             setConfirmLoading(true);
             setTimeout(() => {
-                console.log(JSON.stringify(values));
 
                 if(!bookingContactPerson || !values) return;
 
@@ -75,7 +74,7 @@ export default function BookingDetails({ next }:BookingStepsProps)
                 {
                     id:0,
                     tourId:tourDetails?.id??0,
-                    pricePerPerson:values.pricePerPerson,
+                    pricePerPerson:miniMumPricePerPerson,
                     numberOfPeople:values.numberOfPeople,
                     totalPrice:values.numberOfPeople*miniMumPricePerPerson,
                     tourDate:values.tourDate,
@@ -93,8 +92,10 @@ export default function BookingDetails({ next }:BookingStepsProps)
                     {
                         setCreatedBooking(apiResponse.data);
                         openNotificationWithIcon('success',"booking created");
-                        if(next) next();
-                    }else
+                        localStorage.setItem("bookingData",JSON.stringify(apiResponse.data));
+                        next();
+                    }
+                    else
                     {
                         openNotificationWithIcon('error',apiResponse.message);
                     }
@@ -141,7 +142,7 @@ export default function BookingDetails({ next }:BookingStepsProps)
                 <Form<BookingDto>
                     layout={"vertical"}
                     form={tourBookingForm}
-                    // onFinish={verifyTourist}
+                    onFinish={handleSubmitBooking}
                 >
                     <Form.Item 
                         
