@@ -1,8 +1,8 @@
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import api from '../../api/api';
-import { BookingCreateDto, CreatedBookingDto } from '../../models/booking';
 import { TouristStatus } from '../../models/tourist';
 import { OtpVerificationRequestDTO } from '../../models/auth';
+import { BookingDto } from '../../models/booking';
 
 export const addBannerImage = async (tourId: number,image: FormData) => {
   
@@ -361,29 +361,44 @@ export const deleteTourPrice = async (tourId:number, tourPriceId: number) => {
 };
 
 
-export const addBooking = async (booking : BookingCreateDto) => {
+export const addBooking = async (booking : BookingDto) => {
+
+    let response;
 
     try {
-        console.log("Data to be sent this is in service");
-        console.log(JSON.stringify(booking));
-        const response = await api.post<ApiResponse<CreatedBookingDto>>(`tour/booking`, booking);
+        response = await api.post<ApiResponse<BookingDto>>(`tour/booking`, booking);
         return response.data;
-    } catch (error) {
-      const data : ApiResponse<CreatedBookingDto> = {
+    } catch (error:any) {
+       let message = "An unexpected error occurred";
+        let statusCode = 0;
+        if (error.response) {
+            message = JSON.stringify(error.response.data.message) || "Booking failed";
+            statusCode = error.response.status;
+        } else if (error.request) {
+            message = "No response from server";
+        } else if (error.message) {
+            message = error.message;
+        }
+
+      const data : ApiResponse<BookingDto> = {
         success: false, 
-        message: typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error),
+        message: message,
         data: {
           id:0,
           tourId:0,
-          customerName:"",
-          email:"",
           pricePerPerson:0,
           numberOfPeople:0,
           totalPrice:0,
-          tourDate: new Dayjs,
+          tourDate: dayjs(),
           specialRequests:"",
-          phoneNumber:"",
-          referenceNumber:""
+          referenceNumber:"",
+          contactPerson: {
+            firstName:"",
+            lastName:"",
+            email:"",
+            phoneNumber:""
+          },
+          operatorId:0
 
         },
         statusCode: 0
