@@ -232,13 +232,13 @@ export default function TourDetails()
 
 
     return(
-        <div
-        >
-            {notificationContextHolder}
+        
+            
             <Row
                 justify={'center'}
                 align={'middle'}
             >
+                {notificationContextHolder}
                 <Col xs={24} sm={24} lg={24} xl={24} xxl={24}>
                      <Image
                         width={'100%'}
@@ -247,7 +247,7 @@ export default function TourDetails()
                         preview={false}
                     />
                 </Col>
-                <Col xs={24} sm={24} lg={18} xl={18} xxl={18}>
+                <Col xs={22} sm={22} lg={18} xl={18} xxl={18}>
                     <Typography.Title level={3} style={{textAlign:"center"}}>{tourDetails?.title}</Typography.Title>
                     <Tabs 
                         size="large"
@@ -264,7 +264,7 @@ export default function TourDetails()
                         items={tabItems} 
                     />
                 </Col>
-                <Col xs={24} sm={24} lg={8} xl={8} xxl={8} >
+                <Col xs={22} sm={22} lg={8} xl={8} xxl={8} >
                     <Button 
                         size="large" 
                         type="primary" 
@@ -300,7 +300,7 @@ export default function TourDetails()
 
             </Row>
 
-        </div>
+        
     );
 }
 

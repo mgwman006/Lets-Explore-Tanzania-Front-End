@@ -4,9 +4,12 @@ import HomePage from "./components/HomePage";
 import TourDetails from "./components/TourDetails";
 import ToursList from "./components/ToursList";
 import Zanzibarpage from "./components/Zanzibarpage";
-import { Component } from "react";
+import { Children, Component } from "react";
 import BookingPage from "./components/booking/BookingPage";
-import PayPal from "./components/PayPal";
+import PayPal from "./components/payment/PayPal";
+import PaymentSuccess from "./components/payment/PaymentSuccess";
+import PaymentPage from "./components/payment/PaymentPage";
+
 
 const routes = [
   {
@@ -41,7 +44,17 @@ const routes = [
       },
       {
         path:"pay",
-        Component: PayPal
+        Component: PaymentPage,
+        children:[
+          {
+            path:"",
+            Component: PayPal
+          },
+          {
+            path:"success",
+            Component: PaymentSuccess
+          }
+        ]
       }
     ]
   }
