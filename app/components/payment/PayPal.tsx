@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { captureOrderPayPal, createOrderPayPal } from "../../services/payPalService";
 import { useNavigate } from "react-router";
 import PayPalOrderRequest from "../../models/payPal";
-import { Col, Row } from "antd";
+import { Col, Row, Typography } from "antd";
 
 // Renders errors or successfull transactions on the screen.
 type MessageProps = {
@@ -40,6 +40,9 @@ export default function PayPal()
     const [message, setMessage] = useState("");
       return (
         <Row justify={'center'} align={'middle'}>
+            <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={24}>
+                <Typography.Title level={3} style={{textAlign:'center', color:"green"}}>Total Cost: {payload.amount} {payload.currency}</Typography.Title>
+            </Col>
             <Col xs={22} sm={22} md={18} lg={12} xl={12} xxl={12}>
                 <div className="App">
                     <PayPalScriptProvider options={initialOptions}>
