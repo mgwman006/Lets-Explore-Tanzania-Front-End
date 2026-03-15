@@ -1,7 +1,9 @@
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { useState } from "react";
-import { captureOrderPayPal, createOrderPayPal } from "../services/payPalService";
+import { useEffect, useState } from "react";
+import { captureOrderPayPal, createOrderPayPal } from "../../services/payPalService";
+import { useNavigate } from "react-router";
+import PayPalOrderRequest from "../../models/payPal";
 
 // Renders errors or successfull transactions on the screen.
 type MessageProps = {
@@ -16,13 +18,21 @@ function Message({ content }: MessageProps) {
 const payPalClientId = import.meta.env.VITE_PAY_PAL_CLIENT_ID;
 export default function PayPal()
 {
-    const [currency,setCurrency] = useState('USD');
-    const [amount,setAmount] = useState('10');
+    const navigate = useNavigate();
+    const [payload,setPayload] = useState<PayPalOrderRequest>({currency:"USD",amount:"0",referenceNumber:""});
+
+    useEffect(() => {
+        const payMentPayloadString = localStorage.getItem("payMentPayload");
+        if(!payMentPayloadString) return;
+        const payMentPayload = JSON.parse(payMentPayloadString);
+        setPayload(payMentPayload);
+
+    },[])
 
 
-     const initialOptions = {
+    const initialOptions = {
         "clientId": `${payPalClientId}`,
-        currency: `${currency}`,
+        currency: `${payload.currency}`,
         components: "buttons",
     };
 
@@ -39,16 +49,20 @@ export default function PayPal()
                     }}
                    createOrder={async () => {
                     try {
-                        const order = await createOrderPayPal({
-                            amount: amount,
-                            currency: currency,
-                        });
-
+                        const order = await createOrderPayPal(payload);
                         return order.id;
 
-                    } catch (error) {
-                        console.error(error);
-                        setMessage("Could not create order");
+                    } catch (error:any) {
+                        // if(error.response) 
+                        // {
+                        //     console.log(JSON.stringify(error.response));
+                        //     setMessage("Could not create order 1");
+                        // }
+                        // else
+                        // {
+
+                        // }
+                        setMessage("Could not create order ");
                         throw error;
                     }
                     }}
@@ -80,11 +94,7 @@ export default function PayPal()
                                 setMessage(
                                     `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`
                                 );
-                                console.log(
-                                    "Capture result",
-                                    orderData,
-                                    JSON.stringify(orderData)
-                                );
+                                navigate('/pay/success');
                             }
                         } catch (error) {
                             console.error(error);
